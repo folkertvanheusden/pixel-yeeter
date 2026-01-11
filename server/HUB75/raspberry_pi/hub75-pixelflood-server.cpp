@@ -11,17 +11,24 @@
 #include "pixelflood_handler.h"
 
 std::mutex               canvas_lock;
-rgb_matrix::RGBMatrix   *canvas      = nullptr;
-rgb_matrix::FrameCanvas *draw_canvas = nullptr;
+rgb_matrix::RGBMatrix   *canvas       = nullptr;
+rgb_matrix::FrameCanvas *draw_canvas  = nullptr;
+uint8_t                 *frame_buffer = nullptr;
 
 void draw_pixels(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > & pixels)
 {
-	std::unique_lock<std::mutex> lck(canvas_lock);
-
 	for(auto & pixel: pixels) {
 		const auto [x, y, r, g, b] = pixel;
-                draw_canvas->SetPixel(x, y, r, g, b);
+		frame_buffer[y * draw_canvas->width() * 3 + x * 3 + 0] = r;
+		frame_buffer[y * draw_canvas->width() * 3 + x * 3 + 1] = g;
+		frame_buffer[y * draw_canvas->width() * 3 + x * 3 + 2] = b;
 	}
+
+	std::unique_lock<std::mutex> lck(canvas_lock);
+	SetImage(draw_canvas, 0, 0,
+              frame_buffer, draw_canvas->width() * draw_canvas->height() * 3,
+              draw_canvas->width(), draw_canvas->height(),
+              false);
 	draw_canvas = canvas->SwapOnVSync(draw_canvas);
 }
 
@@ -46,6 +53,8 @@ int main(int argc, char *argv[])
         canvas->SetBrightness(30);
 	draw_canvas = canvas->CreateFrameCanvas();
 
+	frame_buffer = new uint8_t[draw_canvas->width() * draw_canvas->height() * 3]();
+
 	int udp_fd = start_udp_listen("0.0.0.0", 1337);
 	std::thread t([&] {
 			handle_pixelflood_client_datagram(udp_fd, draw_canvas->width(), draw_canvas->height(), draw_pixels);
@@ -68,6 +77,8 @@ int main(int argc, char *argv[])
 
 	close(tcp_fd);
 	close(udp_fd);
+
+	delete [] frame_buffer;
 
 	return 0;
 }
