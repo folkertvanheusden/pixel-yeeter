@@ -2,11 +2,38 @@ from matplotlib import colors
 from PIL import Image, ImageDraw, ImageFont
 import backend
 import colorsys
+import threading
+import time
 
 
 class frontend:
     def __init__(self, b: backend):
         self.b = b
+
+        self._runner_work_items = dict()
+        self._runner_lock = threading.Lock()
+        threading.Thread(target=self._runner).start()
+
+    def _runner(self) -> None:
+        while True:
+            self._runner_lock.acquire()
+            for name in self._runner_work_items:
+                self._runner_work_items[name].tick(self)
+            if len(self._runner_work_items):
+                self.send_to_screen()
+            self._runner_lock.release()
+
+            time.sleep(0.001)
+
+    def add_animation(self, name: str, item) -> None:
+        self._runner_lock.acquire()
+        self._runner_work_items[name] = item
+        self._runner_lock.release()
+
+    def remove_animation(self, name: str) -> None:
+        self._runner_lock.acquire()
+        del self._runner_work_items[name]
+        self._runner_lock.release()
 
     def get_resolution(self) -> list[int, int]:
         return self.b.get_width(), self.b.get_height()
@@ -14,7 +41,7 @@ class frontend:
     def clear_screen(self) -> None:
         self.b.clear_screen()
 
-    def _color_name_to_rgb(self, color: str) -> list[int, int, int]:
+    def color_name_to_rgb(self, color: str) -> list[int, int, int]:
         try:
             r, g, b, a = colors.to_rgba(color)
             return int(r * 255), int(g * 255), int(b * 255)
@@ -22,7 +49,7 @@ class frontend:
             return 127, 127, 127
 
     def set_pixel_color_by_name(self, x: int, y: int, color: str) -> None:
-        r, g, b = self._color_name_to_rgb(color)
+        r, g, b = self.color_name_to_rgb(color)
         self.b.set_pixel(x, y, r, g, b)
 
     # r/g/b: 0...255
@@ -57,7 +84,7 @@ class frontend:
                 error += dx
 
     def draw_line_color_by_name(self, x_start: int, y_start: int, x_end: int, y_end: int, color: str) -> None:
-        r, g, b = self._color_name_to_rgb(color)
+        r, g, b = self.color_name_to_rgb(color)
         self.draw_line_rgb(x_start, y_start, x_end, y_end, r, g, b)
 
     def draw_pil_Image(self, pil_canvas: Image, x_offset: int, y_offset: int):
@@ -76,7 +103,7 @@ class frontend:
         self.draw_pil_Image(image, x, y)
 
     def draw_text_color_by_name(self, x: int, y: int, font_name: str, font_height: float, text: str, color: str) -> None:
-        r, g, b = self._color_name_to_rgb(color)
+        r, g, b = self.color_name_to_rgb(color)
         self.draw_text(x, y, font_name, font_height, text, r, g, b)
 
     def draw_sparkline_rgb(self, x: int, y: int, height: int, values: list[float], r: int, g: int, b: int) -> None:
@@ -91,7 +118,7 @@ class frontend:
                 y_prev_offset = y_offset
 
     def draw_sparkline_color_by_name(self, x: int, y: int, height: int, values: list[float], color: str) -> None:
-        r, g, b = self._color_name_to_rgb(color)
+        r, g, b = self.color_name_to_rgb(color)
         self.draw_sparkline_rgb(x, y, height, values, r, g, b)
 
     def fill_region_rgb(self, x: int, y: int, width: int, height: int, r: int, g: int, b: int) -> None:
@@ -100,8 +127,40 @@ class frontend:
                 self.b.set_pixel(work_x, work_y, r, g, b)
 
     def fill_region_color_by_name(self, x: int, y: int, width: int, height: int, color: str) -> None:
-        r, g, b = self._color_name_to_rgb(color)
+        r, g, b = self.color_name_to_rgb(color)
         self.fill_region_rgb(x, y, width, height, r, g, b)
 
     def send_to_screen(self):
         self.b.update()
+
+class animation:
+    def __init__(self):
+        pass
+
+    def tick(self, f: frontend) -> None:
+        pass
+
+class scroll_text(animation):
+    def __init__(self, f: frontend, color_name: str, text: str):
+        self.text = text
+        self.f = f
+        self.x = None
+        self.clock = 0
+
+        font = ImageFont.truetype('FreeSerif.ttf', f.get_resolution()[1])
+        text_dimensions = font.getbbox(self.text)
+        self.image = Image.new('RGB', (text_dimensions[2], text_dimensions[3]))
+        pil_canvas = ImageDraw.Draw(self.image)
+        pil_canvas.text((0, 0), text, f.color_name_to_rgb(color_name), font = font)
+
+    def tick(self, f: frontend) -> None:
+        if self.x == None:
+            self.x = f.get_resolution()[0]
+        f.draw_pil_Image(self.image, self.x, 0)
+
+        self.clock += 1
+        if self.clock == 10:
+            self.clock = 0
+            self.x -= 1
+            if self.x < -100:
+                self.x = 100

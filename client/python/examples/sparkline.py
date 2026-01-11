@@ -26,8 +26,8 @@ try:
             del values2[0]
 
         canvas.clear_screen()
-        canvas.draw_sparkline_rgb(0, 0, height, values1, 0, 255, 0)
-        canvas.draw_sparkline_rgb(0, 0, height, values2, 255, 40, 40)
+        canvas.draw_sparkline_color_by_name(0, 0, height, values1, 'green')
+        canvas.draw_sparkline_color_by_name(0, 0, height, values2, 'red')
         canvas.send_to_screen()
 
         time.sleep(0.5 if len(values1) == width else 0.01)
