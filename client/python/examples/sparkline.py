@@ -6,7 +6,7 @@ import random
 import time
 
 
-canvas = frontend.frontend(backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True))
+canvas = frontend.frontend(backend_pixelflood.backend_pixelflood('192.168.65.140', 1338, False, (64, 32)))
 
 try:
     width, height = canvas.get_resolution()

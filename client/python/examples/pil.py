@@ -8,7 +8,7 @@ import time
 
 
 text = 'Hello'
-canvas = frontend.frontend(backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True))
+canvas = frontend.frontend(backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True, None))
 width, height = canvas.get_resolution()
 
 x = 0
