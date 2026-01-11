@@ -76,5 +76,29 @@ class frontend:
         r, g, b = self._color_name_to_rgb(color)
         self.draw_text(x, y, font_name, font_height, text, r, g, b)
 
+    def draw_sparkline_rgb(self, x: int, y: int, height: int, values: list[float], r: int, g: int, b: int) -> None:
+        if len(values) >= 2:
+            mn, mx = min(values), max(values)
+            extent = mx - mn
+            scaled = [int((v - mn) / extent * height) for v in values]
+            y_prev_offset = scaled[0]
+            for y_offset in scaled[1:]:
+                self.draw_line_rgb(x, y + y_prev_offset, x + 1, y + y_offset, r, g, b)
+                x += 1
+                y_prev_offset = y_offset
+
+    def draw_sparkline_color_by_name(self, x: int, y: int, height: int, values: list[float], color: str) -> None:
+        r, g, b = self._color_name_to_rgb(color)
+        self.draw_sparkline_rgb(x, y, height, values, r, g, b)
+
+    def fill_region_rgb(self, x: int, y: int, width: int, height: int, r: int, g: int, b: int) -> None:
+        for work_y in range(y, y + height):
+            for work_x in range(x, x + width):
+                self.b.set_pixel(work_x, work_y, r, g, b)
+
+    def fill_region_color_by_name(self, x: int, y: int, width: int, height: int, color: str) -> None:
+        r, g, b = self._color_name_to_rgb(color)
+        self.fill_region_rgb(x, y, width, height, r, g, b)
+
     def send_to_screen(self):
         self.b.update()
