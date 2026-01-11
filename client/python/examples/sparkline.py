@@ -11,19 +11,26 @@ canvas = frontend.frontend(backend_pixelflood.backend_pixelflood('192.168.65.140
 try:
     width, height = canvas.get_resolution()
 
-    y = 0
-    values = []
+    y1 = 0
+    y2 = 0
+    values1 = []
+    values2 = []
     while True:
-        y += random.random() * 2 - 1
-        values.append(y)
-        if len(values) > width:
-            del values[0]
+        y1 += random.random() * 2 - 1
+        values1.append(y1)
+        if len(values1) > width:
+            del values1[0]
+        y2 += random.random() * 2 - 1
+        values2.append(y2)
+        if len(values2) > width:
+            del values2[0]
 
         canvas.clear_screen()
-        canvas.draw_sparkline_rgb(0, 0, height, values, 0, 255, 0)
+        canvas.draw_sparkline_rgb(0, 0, height, values1, 0, 255, 0)
+        canvas.draw_sparkline_rgb(0, 0, height, values2, 255, 40, 40)
         canvas.send_to_screen()
 
-        if len(values) == width:
+        if len(values1) == width:
             time.sleep(0.5)
 
 except KeyboardInterrupt as ki:
