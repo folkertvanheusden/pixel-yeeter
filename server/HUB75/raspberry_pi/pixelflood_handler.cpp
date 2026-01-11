@@ -145,7 +145,7 @@ void handle_pixelflood_payload_binary(uint8_t *const buffer, const size_t n, con
 	bool alpha = buffer[1] & 1;
 	int  inc   = alpha ? 8 : 7;
 
-	std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > pixels(n / inc);
+	std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > pixels;
 
 	for(size_t i=2; i<n; i += inc) {
 		int     x = (buffer[i + 1] << 8) | buffer[i + 0];
@@ -153,6 +153,8 @@ void handle_pixelflood_payload_binary(uint8_t *const buffer, const size_t n, con
 		uint8_t r = buffer[4];
 		uint8_t g = buffer[5];
 		uint8_t b = buffer[6];
+		if (x < 0 || x >= width || y < 0 || y >= height)
+			return;
 		pixels.push_back({ x, y, r, g, b });
 	}
 
