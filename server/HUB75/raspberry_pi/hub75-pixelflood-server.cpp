@@ -46,22 +46,28 @@ int main(int argc, char *argv[])
         canvas->SetBrightness(30);
 	draw_canvas = canvas->CreateFrameCanvas();
 
-	int fd = start_tcp_listen("0.0.0.0", 1337);
+	int udp_fd = start_udp_listen("0.0.0.0", 1337);
+	std::thread t([&] {
+			handle_pixelflood_client_datagram(udp_fd, draw_canvas->width(), draw_canvas->height(), draw_pixels);
+	});
+	t.detach();
+
+	int tcp_fd = start_tcp_listen("0.0.0.0", 1337);
 
 	for(;;) {
-		int cfd = accept(fd, nullptr, nullptr);
+		int cfd = accept(tcp_fd, nullptr, nullptr);
 		if (cfd == -1)
 			error_exit(true, "accept failed");
 
 		std::thread t([&] {
-				handle_pixelflood_client(cfd, false, draw_canvas->width(), draw_canvas->height(), draw_pixels);
+				handle_pixelflood_client_stream(cfd, draw_canvas->width(), draw_canvas->height(), draw_pixels);
 				close(cfd);
 		});
 		t.detach();
 		close(cfd);
 	}
 
-	close(fd);
+	close(tcp_fd);
 
 	return 0;
 }
