@@ -1,5 +1,5 @@
 from matplotlib import colors
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import backend
 import colorsys
 
@@ -18,7 +18,7 @@ class frontend:
         except ValueError as v:
             return 127, 127, 127
 
-    def set_pixel_by_name(self, x: int, y: int, color: str) -> None:
+    def set_pixel_color_by_name(self, x: int, y: int, color: str) -> None:
         r, g, b = self._color_name_to_rgb(color)
         self.b.set_pixel(x, y, r, g, b)
 
@@ -53,7 +53,7 @@ class frontend:
                 y += ystep
                 error += dx
 
-    def draw_line_by_name(self, x_start: int, y_start: int, x_end: int, y_end: int, color: str) -> None:
+    def draw_line_color_by_name(self, x_start: int, y_start: int, x_end: int, y_end: int, color: str) -> None:
         r, g, b = self._color_name_to_rgb(color)
         self.draw_line_rgb(x_start, y_start, x_end, y_end, r, g, b)
 
@@ -63,6 +63,18 @@ class frontend:
             for x in range(pil_canvas.width):
                 rgb = pil_canvas.getpixel((x, y))
                 self.b.set_pixel(x + x_offset, y_use, rgb[0], rgb[1], rgb[2])
+
+    def draw_text(self, x: int, y: int, font_name: str, font_height: float, text: str, r: int, g: int, b: int) -> None:
+        font = ImageFont.truetype(font_name, font_height)
+        text_dimensions = font.getbbox(text)
+        image = Image.new('RGB', (text_dimensions[2], text_dimensions[3]))
+        pil_canvas = ImageDraw.Draw(image)
+        pil_canvas.text((0, 0), text, (r, g, b), font = font)
+        self.draw_pil_Image(image, x, y)
+
+    def draw_text_color_by_name(self, x: int, y: int, font_name: str, font_height: float, text: str, color: str) -> None:
+        r, g, b = self._color_name_to_rgb(color)
+        self.draw_text(x, y, font_name, font_height, text, r, g, b)
 
     def send_to_screen(self):
         self.b.update()
