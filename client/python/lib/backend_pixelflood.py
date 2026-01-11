@@ -19,6 +19,7 @@ class backend_pixelflood(backend.backend):
                 if self.fd == None:
                     self.fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     self.fd.connect((self.host, self.port))
+                    self.fd.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
                     self.fd.send('SIZE\n'.encode('ascii'))
 
                     reply = ''
@@ -34,10 +35,14 @@ class backend_pixelflood(backend.backend):
                     if new_width != self.width or new_height != self.height:
                         self._init(new_width, new_height)
 
+                self.fd.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 0)
+
                 for y in range(self.height):
                     for x in range(self.width):
                         r, g, b = self.get_pixel(x, y)
                         self.fd.send(f'PX {x} {y} {r:02x}{g:02x}{b:02x}\n'.encode('ascii'))
+
+                self.fd.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
                 break  # succes!
 
