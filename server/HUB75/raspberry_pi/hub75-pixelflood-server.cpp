@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <led-matrix.h>
 #include <mutex>
+#include <thread>
 #include <unistd.h>
 #include <sys/socket.h>
 
@@ -52,8 +53,11 @@ int main(int argc, char *argv[])
 		if (cfd == -1)
 			error_exit(true, "accept failed");
 
-		// TODO threads or so
-		handle_pixelflood_client(cfd, false, draw_canvas->width(), draw_canvas->height(), draw_pixels);
+		std::thread t([&] {
+				handle_pixelflood_client(cfd, false, draw_canvas->width(), draw_canvas->height(), draw_pixels);
+				close(cfd);
+		});
+		t.detach();
 		close(cfd);
 	}
 
