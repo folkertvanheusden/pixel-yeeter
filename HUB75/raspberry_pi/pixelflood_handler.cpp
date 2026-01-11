@@ -31,6 +31,7 @@ int hextonibble(const char c)
 void handle_pixelflood_client(const int fd, const bool is_datagram, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
 {
 	if (is_datagram) {
+		fprintf(stderr, "Datagrams not yet supported\n");
 		// TODO
 		return;
 	}
@@ -43,8 +44,10 @@ void handle_pixelflood_client(const int fd, const bool is_datagram, const int wi
 
 	for(;;) {
 		int rc = read(fd, &buffer[n], sizeof(buffer) - n);
-		if (rc == -1 || rc == 0)
+		if (rc == -1 || rc == 0) {
+			fprintf(stderr, "Read error\n");
 			break;
+		}
 
 		n += rc;
 
@@ -56,8 +59,10 @@ void handle_pixelflood_client(const int fd, const bool is_datagram, const int wi
 			*lf = 0x00;
 			if (o + 5 <= n && memcmp(&buffer[o], "SIZE", 4) == 0) {
 				std::string reply = "SIZE " + std::to_string(width) + " " + std::to_string(height) + "\n";
-				if (WRITE(fd, reply.c_str(), reply.size()) == false)
+				if (WRITE(fd, reply.c_str(), reply.size()) == false) {
+					fprintf(stderr, "Write error\n");
 					break;
+				}
 			}
 			// PX x y rrggbb\n => 14
 			else if (o + 14 <= n && buffer[o + 0] == 'P' && buffer[o + 1] == 'X' && buffer[o + 2] == ' ') {
@@ -74,12 +79,15 @@ void handle_pixelflood_client(const int fd, const bool is_datagram, const int wi
 				int   g        = (hextonibble(p_space2[2]) << 4) + hextonibble(p_space2[3]);
 				int   b        = (hextonibble(p_space2[4]) << 4) + hextonibble(p_space2[5]);
 
-				if (x < 0 || x >= width || y < 0 || y > height || r > 255 || g > 255 || b > 255)
+				if (x < 0 || x >= width || y < 0 || y > height || r > 255 || g > 255 || b > 255) {
+					fprintf(stderr, "Pixel invalid (%d,%d %d,%d,%d | %d,%d)?\n", x, y, r, g, b, width, height);
 					return;
+				}
 
 				pixels.push_back({ x, y, r, g, b });
 			}
 			else {
+				fprintf(stderr, "Garbage? (%s)\n", std::string(&buffer[o], n - o).c_str());
 				return;
 			}
 
@@ -88,7 +96,11 @@ void handle_pixelflood_client(const int fd, const bool is_datagram, const int wi
 
 		if (o < n) {
 			memmove(&buffer[0], &buffer[o], n - o);
-			n = o;
+			n -= o;
+			o = 0;
+		}
+		else {
+			n = 0;
 			o = 0;
 		}
 
