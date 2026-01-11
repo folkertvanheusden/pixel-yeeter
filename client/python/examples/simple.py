@@ -3,9 +3,14 @@
 import backend_pixelflood
 import random
 import sys
+import time
 
 
 b = backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True)
+
+start_ts = time.time()
+prev_ts = start_ts
+n_frames = 0
 
 while True:
     for y in range(b.get_height()):
@@ -13,3 +18,9 @@ while True:
             b.set_pixel(x, y, random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     b.update()
+
+    n_frames += 1
+    now_ts = time.time()
+    if now_ts - prev_ts >= 1.0:
+        prev_ts = now_ts
+        print(f'{n_frames / (now_ts - start_ts):.2f} FPS')
