@@ -11,6 +11,9 @@ class frontend:
     def get_resolution(self) -> list[int, int]:
         return self.b.get_width(), self.b.get_height()
 
+    def clear_screen(self) -> None:
+        self.b.clear_screen()
+
     def _color_name_to_rgb(self, color: str) -> list[int, int, int]:
         try:
             r, g, b = colors.to_rgba(color)

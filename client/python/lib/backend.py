@@ -5,6 +5,9 @@ class backend:
     def _init(self, width: int, height: int):
         self.width = width
         self.height = height
+        self.clear_screen()
+
+    def clear_screen(self) -> None:
         self.fb = [ 0 ] * width * height * 3
 
     def get_width(self) -> int:
