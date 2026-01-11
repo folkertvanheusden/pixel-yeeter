@@ -1,6 +1,7 @@
 #include <cctype>
 #include <cstdint>
 #include <cstring>
+#include <errno.h>
 #include <functional>
 #include <optional>
 #include <unistd.h>
@@ -100,7 +101,7 @@ void handle_pixelflood_client_stream(const int fd, const int width, const int he
 	for(;;) {
 		int rc = read(fd, &buffer[n], sizeof(buffer) - n);
 		if (rc == -1 || rc == 0) {
-			fprintf(stderr, "Read error\n");
+			fprintf(stderr, "Read error: %s\n", strerror(errno));
 			break;
 		}
 

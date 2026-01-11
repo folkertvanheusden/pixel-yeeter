@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
 				close(cfd);
 		});
 		t.detach();
-		close(cfd);
 	}
 
 	close(tcp_fd);
