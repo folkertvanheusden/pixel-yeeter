@@ -32,7 +32,7 @@ int hextonibble(const char c)
 	return cu - '0';
 }
 
-std::optional<std::string> handle_pixelflood_payload(char *const buffer, size_t *const n, size_t *const offset, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
+std::optional<std::string> handle_pixelflood_payload_text(char *const buffer, size_t *const n, size_t *const offset, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
 {
 	std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > pixels;
 
@@ -87,12 +87,11 @@ std::optional<std::string> handle_pixelflood_payload(char *const buffer, size_t 
 	}
 
 	draw_pixels(pixels);
-	pixels.clear();
 
 	return { };
 }
 
-void handle_pixelflood_client_stream(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
+void handle_pixelflood_client_stream_text(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
 {
 	char   buffer[65536];
 	size_t n      = 0;
@@ -107,15 +106,15 @@ void handle_pixelflood_client_stream(const int fd, const int width, const int he
 
 		n += rc;
 
-		auto reply = handle_pixelflood_payload(buffer, &n, &offset, width, height, draw_pixels);
+		auto reply = handle_pixelflood_payload_text(buffer, &n, &offset, width, height, draw_pixels);
 		if (reply.has_value())
 			WRITE(fd, reply.value().c_str(), reply.value().size());
 	}
 }
 
-void handle_pixelflood_client_datagram(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
+void handle_pixelflood_client_datagram_text(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
 {
-	char   buffer[65536];
+	char buffer[65536];
 
 	for(;;) {
 		sockaddr_in6 addr { };
@@ -129,8 +128,50 @@ void handle_pixelflood_client_datagram(const int fd, const int width, const int 
 		size_t n      = rc;
 		size_t offset = 0;
 
-		auto reply = handle_pixelflood_payload(buffer, &n, &offset, width, height, draw_pixels);
+		auto reply = handle_pixelflood_payload_text(buffer, &n, &offset, width, height, draw_pixels);
 		if (reply.has_value())
 			sendto(fd, reply.value().c_str(), reply.value().size(), 0, reinterpret_cast<sockaddr *>(&addr), addr_len);
+	}
+}
+
+// https://github.com/JanKlopper/pixelvloed/blob/master/protocol.md
+void handle_pixelflood_payload_binary(uint8_t *const buffer, const size_t n, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
+{
+	if (buffer[0]) {
+		printf("Protocol version %d not supported yet\n", buffer[0]);
+		return;
+	}
+
+	bool alpha = buffer[1] & 1;
+	int  inc   = alpha ? 8 : 7;
+
+	std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > pixels(n / inc);
+
+	for(size_t i=2; i<n; i += inc) {
+		int     x = (buffer[i + 1] << 8) | buffer[i + 0];
+		int     y = (buffer[i + 3] << 8) | buffer[i + 2];
+		uint8_t r = buffer[4];
+		uint8_t g = buffer[5];
+		uint8_t b = buffer[6];
+		pixels.push_back({ x, y, r, g, b });
+	}
+
+	draw_pixels(pixels);
+}
+
+void handle_pixelflood_client_datagram_binary(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
+{
+	uint8_t buffer[1122 + 9];  // as per protocol, +9 so not to require bound checks
+
+	for(;;) {
+		sockaddr_in6 addr { };
+		socklen_t    addr_len = sizeof addr;
+		int rc = recvfrom(fd, buffer, sizeof buffer, 0, reinterpret_cast<sockaddr *>(&addr), &addr_len);
+		if (rc == -1)
+			break;
+		if (rc == 0)
+			continue;
+
+		handle_pixelflood_payload_binary(buffer, rc, width, height, draw_pixels);
 	}
 }

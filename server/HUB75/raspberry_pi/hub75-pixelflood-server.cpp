@@ -55,11 +55,17 @@ int main(int argc, char *argv[])
 
 	frame_buffer = new uint8_t[draw_canvas->width() * draw_canvas->height() * 3]();
 
-	int udp_fd = start_udp_listen("0.0.0.0", 1337);
-	std::thread t([&] {
-			handle_pixelflood_client_datagram(udp_fd, draw_canvas->width(), draw_canvas->height(), draw_pixels);
+	int udp_txt_fd = start_udp_listen("0.0.0.0", 1337);
+	std::thread t_txt([&] {
+			handle_pixelflood_client_datagram_text(udp_txt_fd, draw_canvas->width(), draw_canvas->height(), draw_pixels);
 	});
-	t.detach();
+	t_txt.detach();
+
+	int udp_bin_fd = start_udp_listen("0.0.0.0", 1338);
+	std::thread t_bin([&] {
+			handle_pixelflood_client_datagram_text(udp_bin_fd, draw_canvas->width(), draw_canvas->height(), draw_pixels);
+	});
+	t_bin.detach();
 
 	int tcp_fd = start_tcp_listen("0.0.0.0", 1337);
 
@@ -69,14 +75,15 @@ int main(int argc, char *argv[])
 			error_exit(true, "accept failed");
 
 		std::thread t([&] {
-				handle_pixelflood_client_stream(cfd, draw_canvas->width(), draw_canvas->height(), draw_pixels);
+				handle_pixelflood_client_stream_text(cfd, draw_canvas->width(), draw_canvas->height(), draw_pixels);
 				close(cfd);
 		});
 		t.detach();
 	}
 
 	close(tcp_fd);
-	close(udp_fd);
+	close(udp_bin_fd);
+	close(udp_txt_fd);
 
 	delete [] frame_buffer;
 
