@@ -38,9 +38,11 @@ class backend_pixelflood(backend.backend):
                 self.fd.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 0)
 
                 for y in range(self.height):
+                    buffer = ''
                     for x in range(self.width):
                         r, g, b = self.get_pixel(x, y)
-                        self.fd.send(f'PX {x} {y} {r:02x}{g:02x}{b:02x}\n'.encode('ascii'))
+                        buffer += f'PX {x} {y} {r:02x}{g:02x}{b:02x}\n'
+                    self.fd.send(buffer.encode('ascii'))
 
                 self.fd.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
