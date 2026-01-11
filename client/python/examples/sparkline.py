@@ -30,8 +30,7 @@ try:
         canvas.draw_sparkline_rgb(0, 0, height, values2, 255, 40, 40)
         canvas.send_to_screen()
 
-        if len(values1) == width:
-            time.sleep(0.5)
+        time.sleep(0.5 if len(values1) == width else 0.01)
 
 except KeyboardInterrupt as ki:
     print('Terminating')
