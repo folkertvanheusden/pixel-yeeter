@@ -6,7 +6,7 @@ import sys
 import time
 
 
-b = backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True, None)
+b = backend_pixelflood.backend_pixelflood('192.168.65.140', 1338, False, (64, 32))
 
 start_ts = time.time()
 prev_ts = start_ts
