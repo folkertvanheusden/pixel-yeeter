@@ -1,26 +1,26 @@
 #! /usr/bin/env python
 
 import backend_pixelflood
+import frontend
 import random
 import sys
 import time
 
 
-b = backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True)
-
-start_ts = time.time()
-prev_ts = start_ts
-n_frames = 0
+canvas = frontend.frontend(backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True))
+width, height = canvas.get_resolution()
 
 while True:
-    for y in range(b.get_height()):
-        for x in range(b.get_width()):
-            b.set_pixel(x, y, random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    if random.randint(0, 1):
+        x = random.randint(0, width - 1)
+        y = random.randint(0, height - 1)
+        canvas.set_pixel_rgb(x, y, random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
-    b.update()
+    else:
+        x1 = random.randint(0, width - 1)
+        y1 = random.randint(0, height - 1)
+        x2 = random.randint(0, width - 1)
+        y2 = random.randint(0, height - 1)
+        canvas.draw_line_rgb(x1, y1, x2, y2, random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
-    n_frames += 1
-    now_ts = time.time()
-    if now_ts - prev_ts >= 1.0:
-        prev_ts = now_ts
-        print(f'{n_frames / (now_ts - start_ts):.2f} FPS')
+    canvas.send_to_screen()
