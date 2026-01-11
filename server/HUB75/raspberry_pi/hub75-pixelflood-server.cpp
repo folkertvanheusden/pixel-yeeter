@@ -19,9 +19,10 @@ void draw_pixels(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_
 {
 	for(auto & pixel: pixels) {
 		const auto [x, y, r, g, b] = pixel;
-		frame_buffer[y * draw_canvas->width() * 3 + x * 3 + 0] = r;
-		frame_buffer[y * draw_canvas->width() * 3 + x * 3 + 1] = g;
-		frame_buffer[y * draw_canvas->width() * 3 + x * 3 + 2] = b;
+		int offset = y * draw_canvas->width() * 3 + x * 3;
+		frame_buffer[offset + 0] = r;
+		frame_buffer[offset + 1] = g;
+		frame_buffer[offset + 2] = b;
 	}
 
 	std::unique_lock<std::mutex> lck(canvas_lock);
