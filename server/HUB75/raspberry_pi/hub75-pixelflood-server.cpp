@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
 	int udp_bin_fd = start_udp_listen("0.0.0.0", 1338);
 	std::thread t_bin([&] {
-			handle_pixelflood_client_datagram_text(udp_bin_fd, draw_canvas->width(), draw_canvas->height(), draw_pixels);
+			handle_pixelflood_client_datagram_binary(udp_bin_fd, draw_canvas->width(), draw_canvas->height(), draw_pixels);
 	});
 	t_bin.detach();
 

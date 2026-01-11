@@ -138,7 +138,7 @@ void handle_pixelflood_client_datagram_text(const int fd, const int width, const
 void handle_pixelflood_payload_binary(uint8_t *const buffer, const size_t n, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
 {
 	if (buffer[0]) {
-		printf("Protocol version %d not supported yet\n", buffer[0]);
+		fprintf(stderr, "Protocol version %d not supported yet\n", buffer[0]);
 		return;
 	}
 
