@@ -1,0 +1,3 @@
+[submodule "HUB75/raspberry_pi/rpi-rgb-led-matrix"]
+	path = HUB75/raspberry_pi/rpi-rgb-led-matrix
+	url = https://github.com/hzeller/rpi-rgb-led-matrix
