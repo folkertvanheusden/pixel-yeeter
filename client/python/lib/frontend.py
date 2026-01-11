@@ -16,7 +16,7 @@ class frontend:
 
     def _color_name_to_rgb(self, color: str) -> list[int, int, int]:
         try:
-            r, g, b = colors.to_rgba(color)
+            r, g, b, a = colors.to_rgba(color)
             return int(r * 255), int(g * 255), int(b * 255)
         except ValueError as v:
             return 127, 127, 127
