@@ -8,7 +8,7 @@ class backend:
         self.clear_screen()
 
     def clear_screen(self) -> None:
-        self.fb = [ 0 ] * width * height * 3
+        self.fb = [ 0 ] * self.width * self.height * 3
 
     def get_width(self) -> int:
         return self.width

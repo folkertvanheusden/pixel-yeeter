@@ -19,7 +19,7 @@ try:
         if len(values) > width:
             del values[0]
 
-        canvas.fill_region_rgb(0, 0, width, height, 0, 0, 0)
+        canvas.clear_screen()
         canvas.draw_sparkline_rgb(0, 0, height, values, 0, 255, 0)
         canvas.send_to_screen()
 
