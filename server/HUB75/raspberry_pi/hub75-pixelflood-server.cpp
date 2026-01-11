@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
 	}
 
 	close(tcp_fd);
+	close(udp_fd);
 
 	return 0;
 }
