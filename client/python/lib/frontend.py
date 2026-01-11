@@ -90,9 +90,10 @@ class frontend:
     def draw_pil_Image(self, pil_canvas: Image, x_offset: int, y_offset: int):
         for y in range(pil_canvas.height):
             y_use = y + y_offset
-            for x in range(pil_canvas.width):
-                rgb = pil_canvas.getpixel((x, y))
-                self.b.set_pixel(x + x_offset, y_use, rgb[0], rgb[1], rgb[2])
+            if y_use < 0:
+                continue
+            rgb_values = [pil_canvas.getpixel((x, y)) for x in range(0, pil_canvas.width)]
+            self.b.set_pixels_horizontal(x_offset, y_use, rgb_values)
 
     def draw_text(self, x: int, y: int, font_name: str, font_height: float, text: str, r: int, g: int, b: int) -> None:
         font = ImageFont.truetype(font_name, font_height)
@@ -144,23 +145,25 @@ class scroll_text(animation):
     def __init__(self, f: frontend, color_name: str, text: str):
         self.text = text
         self.f = f
+        self.target_width = f.get_resolution()[0]
         self.x = None
         self.clock = 0
 
         font = ImageFont.truetype('FreeSerif.ttf', f.get_resolution()[1])
         text_dimensions = font.getbbox(self.text)
         self.image = Image.new('RGB', (text_dimensions[2], text_dimensions[3]))
+        self.text_width = text_dimensions[2]
         pil_canvas = ImageDraw.Draw(self.image)
         pil_canvas.text((0, 0), text, f.color_name_to_rgb(color_name), font = font)
 
     def tick(self, f: frontend) -> None:
         if self.x == None:
-            self.x = f.get_resolution()[0]
-        f.draw_pil_Image(self.image, self.x, 0)
+            self.x = self.target_width
 
         self.clock += 1
-        if self.clock == 10:
+        if self.clock == 20:
             self.clock = 0
+            f.draw_pil_Image(self.image, self.x, 0)
             self.x -= 1
-            if self.x < -100:
-                self.x = 100
+            if self.x < -self.text_width:
+                self.x = self.target_width
