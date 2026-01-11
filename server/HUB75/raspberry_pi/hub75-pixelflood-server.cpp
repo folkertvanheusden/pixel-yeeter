@@ -25,9 +25,11 @@ void draw_pixels(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_
 		frame_buffer[offset + 2] = b;
 	}
 
+	size_t byte_count = draw_canvas->width() * draw_canvas->height() * 3;
+
 	std::unique_lock<std::mutex> lck(canvas_lock);
 	SetImage(draw_canvas, 0, 0,
-              frame_buffer, draw_canvas->width() * draw_canvas->height() * 3,
+              frame_buffer, byte_count,
               draw_canvas->width(), draw_canvas->height(),
               false);
 	draw_canvas = canvas->SwapOnVSync(draw_canvas);

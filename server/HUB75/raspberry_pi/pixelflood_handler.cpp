@@ -150,9 +150,9 @@ void handle_pixelflood_payload_binary(uint8_t *const buffer, const size_t n, con
 	for(size_t i=2; i<n; i += inc) {
 		int     x = (buffer[i + 1] << 8) | buffer[i + 0];
 		int     y = (buffer[i + 3] << 8) | buffer[i + 2];
-		uint8_t r = buffer[4];
-		uint8_t g = buffer[5];
-		uint8_t b = buffer[6];
+		uint8_t r = buffer[i + 4];
+		uint8_t g = buffer[i + 5];
+		uint8_t b = buffer[i + 6];
 		if (x < 0 || x >= width || y < 0 || y >= height)
 			return;
 		pixels.push_back({ x, y, r, g, b });
