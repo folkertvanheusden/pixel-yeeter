@@ -19,9 +19,9 @@ class frontend:
             self._runner_lock.acquire()
             for name in self._runner_work_items:
                 self._runner_work_items[name].tick(self)
-            self._runner_lock.release()
             if len(self._runner_work_items):
                 self.send_to_screen()
+            self._runner_lock.release()
 
             time.sleep(0.001)
 
