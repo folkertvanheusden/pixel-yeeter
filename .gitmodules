@@ -1,3 +1,6 @@
 [submodule "HUB75/raspberry_pi/rpi-rgb-led-matrix"]
-	path = server/HUB75/raspberry_pi/rpi-rgb-led-matrix
+	path = server/HUB75/raspberry_pi/pixelflood/rpi-rgb-led-matrix
+	url = https://github.com/hzeller/rpi-rgb-led-matrix
+[submodule "server/HUB75/raspberry_pi/ddp/rpi-rgb-led-matrix"]
+	path = server/HUB75/raspberry_pi/ddp/rpi-rgb-led-matrix
 	url = https://github.com/hzeller/rpi-rgb-led-matrix
