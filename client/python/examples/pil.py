@@ -1,14 +1,14 @@
 #! /usr/bin/env python
 
 from PIL import Image, ImageDraw, ImageFont
-import backend_pixelflood
+import pixel_blaster.backend_pixelflood
 import colorsys
-import frontend
+import pixel_blaster.frontend
 import time
 
 
 text = 'Hello'
-canvas = frontend.frontend(backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True, None))
+canvas = pixel_blaster.frontend.frontend(pixel_blaster.backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True, None))
 width, height = canvas.get_resolution()
 
 x = 0

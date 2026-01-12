@@ -1,13 +1,13 @@
 #! /usr/bin/env python
 
-import backend_pixelflood
-import frontend
+import pixel_blaster.backend_pixelflood
+import pixel_blaster.frontend
 import random
 import sys
 import time
 
 
-canvas = frontend.frontend(backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True, None))
+canvas = pixel_blaster.frontend.frontend(pixel_blaster.backend_pixelflood.backend_pixelflood('192.168.65.140', 1337, True, None))
 width, height = canvas.get_resolution()
 
 while True:

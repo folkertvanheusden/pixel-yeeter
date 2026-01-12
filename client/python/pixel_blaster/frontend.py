@@ -1,6 +1,6 @@
 from matplotlib import colors
 from PIL import Image, ImageDraw, ImageFont
-import backend
+from pixel_blaster import backend
 import colorsys
 import threading
 import time
