@@ -10,6 +10,27 @@ add_definitions("-D_FILE_OFFSET_BITS=64")
 
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
+if (ASAN EQUAL 1)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined")
+        MESSAGE("WITH ASAN (and USAN)")
+else()
+	MESSAGE("without ASAN/USAN")
+endif()
+
+if (MSAN EQUAL 1)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory")
+        MESSAGE("WITH MSAN")
+else()
+        MESSAGE("without MSAN")
+endif()
+
+if (TSAN EQUAL 1)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
+        MESSAGE("WITH TSAN")
+else()
+        MESSAGE("without TSAN")
+endif()
+
 add_compile_options(-Wall -pedantic)
 
 include_directories(rpi-rgb-led-matrix/include)
@@ -22,9 +43,16 @@ add_executable(hub75-ddp-server
 	ddp_handler.cpp
 	)
 
-target_link_libraries(hub75-ddp-server rgbmatrix)
-
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads)
-target_link_libraries(hub75-ddp-server Threads::Threads)
+
+if (ASAN EQUAL 1)
+        target_link_libraries(hub75-ddp-server PRIVATE -fsanitize=address,undefined Threads::Threads rgbmatrix)
+elseif (TSAN EQUAL 1)
+        target_link_libraries(hub75-ddp-server PRIVATE -fsanitize=thread Threads::Threads rgbmatrix)
+elseif (MSAN EQUAL 1)
+        target_link_libraries(hub75-ddp-server PRIVATE -fsanitize=memory Threads::Threads rgbmatrix)
+else()
+        target_link_libraries(hub75-ddp-server PRIVATE Threads::Threads rgbmatrix)
+endif()
