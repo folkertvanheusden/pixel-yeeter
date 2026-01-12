@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 
-import backend_pixelflood
+import backend_ddp
 import random
 import sys
 import time
 
 
-b = backend_pixelflood.backend_pixelflood('192.168.65.140', 1338, False, (64, 32))
+b = backend_ddp.backend_ddp('192.168.65.140', 4048, (64, 32))
 
 start_ts = time.time()
 prev_ts = start_ts
