@@ -29,9 +29,10 @@ bool handle_ddp_payload_binary(const uint8_t *const buffer, const size_t n, cons
 
 	std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > pixels;
 
-	for(size_t i=(has_timecode ? 14 : 10); i<n; i += 3) {
-		unsigned offset_offseted = offset + i;
-		int x = offset_offseted % (width * 3);
+	int packet_start_index = has_timecode ? 14 : 10;
+	for(size_t i=packet_start_index; i<n; i += 3) {
+		unsigned offset_offseted = offset + i - packet_start_index;
+		int x = (offset_offseted / 3) % width;
 		int y = offset_offseted / (width * 3);
 		pixels.push_back({ x, y, buffer[i + 0], buffer[i + 1], buffer[i + 2] });
 	}
