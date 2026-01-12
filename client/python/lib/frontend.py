@@ -161,7 +161,7 @@ class scroll_text(animation):
             self.x = self.target_width
 
         self.clock += 1
-        if self.clock == 20:
+        if self.clock == 10:
             self.clock = 0
             f.draw_pil_Image(self.image, self.x, 0)
             self.x -= 1
