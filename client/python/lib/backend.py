@@ -18,11 +18,10 @@ class backend:
 
     def set_pixel(self, x: int, y: int, r: int, g: int, b: int) -> None:
         if x < self.width and y < self.height and x >= 0 and y >= 0:
-            if r >= 0 and r <= 255 and g >= 0 and g <= 255 and b >= 0 and b <= 255:
-                o = y * self.width * 3 + x * 3
-                self.fb[o + 0] = r
-                self.fb[o + 1] = g
-                self.fb[o + 2] = b
+            o = y * self.width * 3 + x * 3
+            self.fb[o + 0] = r & 255
+            self.fb[o + 1] = g & 255
+            self.fb[o + 2] = b & 255
 
     def set_pixels_horizontal(self, x: int, y: int, values: list[list[int]]) -> None:
         offset_y = self.width * y * 3
