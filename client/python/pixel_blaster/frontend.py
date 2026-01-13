@@ -118,15 +118,16 @@ class frontend:
         self.draw_text(x, y, font_name, font_height, text, r, g, b, overlay)
 
     def draw_sparkline_rgb(self, x: int, y: int, height: int, values: list[float], r: int, g: int, b: int, a: int = 255, overlay: bool = False) -> None:
-        if len(values) >= 2:
+        if len(values) >= 1:
             mn, mx = min(values), max(values)
             extent = mx - mn
-            scaled = [int((v - mn) / extent * height) for v in values]
-            y_prev_offset = scaled[0]
-            for y_offset in scaled[1:]:
-                self.draw_line_rgb(x, y + y_prev_offset, x + 1, y + y_offset, r, g, b, a, overlay)
-                x += 1
-                y_prev_offset = y_offset
+            if extent != 0:
+                scaled = [int((v - mn) / extent * height) for v in values]
+                y_prev_offset = scaled[0]
+                for y_offset in scaled[1:]:
+                    self.draw_line_rgb(x, y + y_prev_offset, x + 1, y + y_offset, r, g, b, a, overlay)
+                    x += 1
+                    y_prev_offset = y_offset
 
     def draw_sparkline_color_by_name(self, x: int, y: int, height: int, values: list[float], color: str, overlay: bool = False) -> None:
         r, g, b, a = self.color_name_to_rgb_alpha(color)
