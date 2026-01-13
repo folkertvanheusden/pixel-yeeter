@@ -149,14 +149,14 @@ class animation:
         pass
 
 class scroll_text(animation):
-    def __init__(self, f: frontend, color_name: str, text: str):
+    def __init__(self, f: frontend, color_name: str, text: str, font_name: str = 'FreeSerif'):
         self.text = text
         self.f = f
         self.target_width = f.get_resolution()[0]
         self.x = None
         self.clock = 0
 
-        font = ImageFont.truetype('FreeSerif.ttf', f.get_resolution()[1])
+        font = ImageFont.truetype(font_name, f.get_resolution()[1])
         text_dimensions = font.getbbox(self.text)
         self.image = Image.new('RGBA', (text_dimensions[2], text_dimensions[3]))
         self.text_width = text_dimensions[2]
