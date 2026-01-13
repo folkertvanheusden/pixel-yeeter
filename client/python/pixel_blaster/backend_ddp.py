@@ -38,11 +38,10 @@ class backend_ddp(backend.backend):
                 p_offset = offset = 0
                 for y in range(self.height):
                     for x in range(self.width):
-                        r, g, b, a = self.get_pixel_alpha(x, y)
-                        ro, go, bo, ao = self.get_pixel_alpha(x, y, overlay = True)
-                        buffer.append((r * (255 - ao) + ro * ao) // 256)
-                        buffer.append((g * (255 - ao) + go * ao) // 256)
-                        buffer.append((b * (255 - ao) + bo * ao) // 256)
+                        r, g, b = self.get_mixed_pixel(x, y)
+                        buffer.append(r)
+                        buffer.append(g)
+                        buffer.append(b)
                         offset += 3
 
                         if len(buffer) > 1440 - 3:

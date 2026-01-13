@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import pixel_blaster.backend
 import pixel_blaster.backend_ddp
 import pixel_blaster.frontend
 import paho.mqtt.client as mqtt
@@ -51,7 +52,7 @@ def mpd():
                 font_height = 13
                 text_y_offset = height - font_height
                 canvas.fill_region_color_by_name(0, text_y_offset, width, font_height, 'black')
-                canvas.draw_text_color_by_name(0, text_y_offset, 'NotoSerif-Black.ttf', font_height - 2, song, 'grey', True)
+                canvas.draw_text_color_by_name(0, text_y_offset, 'NotoSerif-Black.ttf', font_height - 2, song, 'grey', pixel_blaster.backend.layer_types.middle)
                 canvas.send_to_screen()
 
                 time.sleep(5)
@@ -81,7 +82,7 @@ def power_usage(queue: queue.Queue):
                     color = 'yellow'
                 else:
                     color = 'green'
-                canvas.draw_text_color_by_name(text_x_offset, 0, font_name, font_height - 2, text, color, True)
+                canvas.draw_text_color_by_name(text_x_offset, 0, font_name, font_height - 2, text, color, pixel_blaster.backend.layer_types.middle)
                 canvas.send_to_screen()
             except Exception as e:
                 print(f'power usage on_message failed: {e} ({e.__traceback__.tb_lineno})')
@@ -190,9 +191,9 @@ while True:
         except queue.Empty:
             pass
 
-        canvas.clear_screen()
-        canvas.draw_sparkline_color_by_name(0, 0, height, pu_values, 'red')
-        canvas.draw_sparkline_color_by_name(0, 0, height, btc_values, 'blue')
+        canvas.clear_back()
+        canvas.draw_sparkline_color_by_name(0, 0, height, pu_values, 'red', pixel_blaster.backend.layer_types.back)
+        canvas.draw_sparkline_color_by_name(0, 0, height, btc_values, 'blue', pixel_blaster.backend.layer_types.back)
         canvas.send_to_screen()
 
         # scroller
@@ -210,7 +211,7 @@ while True:
             if now - scroller_since >= 10.0:
                 canvas.remove_animation(scroller_name)
                 scroller_since = None
-                canvas.clear_overlay()
+                canvas.clear_front()
                 canvas.send_to_screen()
 
     except Exception as e:
