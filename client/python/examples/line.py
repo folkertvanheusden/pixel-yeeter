@@ -9,7 +9,7 @@ canvas = pixel_yeeter.frontend.frontend(pixel_yeeter.backend_ddp.backend_ddp('19
 width, height = canvas.get_resolution()
 canvas.clear_screen()
 for y in range(height):
-    canvas.draw_line_rgb(0, y, width, y, 0, 0, 255)
+    canvas.draw_line_rgb(0, y, width, y, 0, 0, int(y * 255 / height), layer=pixel_yeeter.backend.layer_types.back)
 canvas.draw_line_rgb(0, 0, width, height, 0, 255, 0)
 canvas.draw_line_rgb(width, 0, 0, height, 255, 0, 0)
 canvas.send_to_screen()
