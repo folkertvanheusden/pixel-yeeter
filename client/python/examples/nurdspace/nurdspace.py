@@ -174,7 +174,7 @@ while True:
     try:
         # power usage
         try:
-            value = pu_queue.get(timeout = 0.25)
+            value = pu_queue.get(timeout = 0.1)
             pu_values.append(value)
             while len(pu_values) > width:
                 del pu_values[0]
@@ -183,7 +183,7 @@ while True:
 
         # bitcoin
         try:
-            value = btc_queue.get(timeout = 0.25)
+            value = btc_queue.get(timeout = 0.1)
             btc_values.append(value)
             while len(btc_values) > width:
                 del btc_values[0]
@@ -197,7 +197,7 @@ while True:
 
         # scroller
         try:
-            text = scroller_queue.get(timeout = 0.25)
+            text = scroller_queue.get(timeout = 0.1)
             if not scroller_since is None:
                 canvas.remove_animation(scroller_name)
             canvas.add_animation(scroller_name, pixel_blaster.frontend.scroll_text(canvas, 'white', text))
