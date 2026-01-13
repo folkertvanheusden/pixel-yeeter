@@ -63,13 +63,14 @@ class backend_pixelflood(backend.backend):
                     for y in range(self.height):
                         for x in range(self.width):
                             r, g, b, a = self.get_pixel_alpha(x, y)
+                            ro, go, bo, ao = self.get_pixel_alpha(x, y, overlay = True)
                             buffer.append(x & 255)
                             buffer.append(x >> 8)
                             buffer.append(y & 255)
                             buffer.append(y >> 8)
-                            buffer.append(r * a // 256)
-                            buffer.append(g * a // 256)
-                            buffer.append(b * a // 256)
+                            buffer.append((r * (255 - ao) + ro * ao) // 256)
+                            buffer.append((g * (255 - ao) + go * ao) // 256)
+                            buffer.append((b * (255 - ao) + bo * ao) // 256)
 
                             if len(buffer) > 1122 - 7:
                                 self.fd.sendto(buffer, (self.host, self.port))
