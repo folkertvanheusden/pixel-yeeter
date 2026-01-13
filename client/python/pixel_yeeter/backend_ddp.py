@@ -1,4 +1,4 @@
-from pixel_blaster import backend
+from pixel_yeeter import backend
 import socket
 import time
 

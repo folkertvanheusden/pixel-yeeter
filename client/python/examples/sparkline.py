@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 
-import pixel_blaster.backend_ddp
-import pixel_blaster.frontend
+import pixel_yeeter.backend_ddp
+import pixel_yeeter.frontend
 import random
 import time
 
 
-canvas = pixel_blaster.frontend.frontend(pixel_blaster.backend_ddp.backend_ddp('192.168.65.140', 4048, (64, 32)))
+canvas = pixel_yeeter.frontend.frontend(pixel_yeeter.backend_ddp.backend_ddp('192.168.65.140', 4048, (64, 32)))
 
 try:
     width, height = canvas.get_resolution()

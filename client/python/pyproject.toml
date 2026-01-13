@@ -3,7 +3,7 @@ requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pixel_blaster"
+name = "pixel_yeeter"
 version = "0.1.0"
 authors = [
   { name="Folkert van Heusden", email="folkert@vanheusden.com" },
@@ -18,5 +18,5 @@ classifiers = [
 license = {file = "LICENSE" }
 
 [project.urls]
-Homepage = "https://github.com/folkertvanheusden/pixel-blaster"
-Issues = "https://github.com/folkertvanheusden/pixel-blaster/issues"
+Homepage = "https://github.com/folkertvanheusden/pixel-yeeter"
+Issues = "https://github.com/folkertvanheusden/pixel-yeeter/issues"

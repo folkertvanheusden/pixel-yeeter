@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 
-import pixel_blaster.backend
-import pixel_blaster.backend_ddp
-import pixel_blaster.frontend
+import pixel_yeeter.backend
+import pixel_yeeter.backend_ddp
+import pixel_yeeter.frontend
 import paho.mqtt.client as mqtt
 import queue
 import random
@@ -32,7 +32,7 @@ SCROLLER_PORT = 5001
 HTTP_INTERFACE = '0.0.0.0'
 HTTP_PORT = 8000
 
-canvas = pixel_blaster.frontend.frontend(pixel_blaster.backend_ddp.backend_ddp(DDP_HOST, DDP_PORT, DDP_DIM))
+canvas = pixel_yeeter.frontend.frontend(pixel_yeeter.backend_ddp.backend_ddp(DDP_HOST, DDP_PORT, DDP_DIM))
 width, height = canvas.get_resolution()
 
 def mpd():
@@ -57,7 +57,7 @@ def mpd():
                 font_height = 13
                 text_y_offset = height - font_height
                 canvas.fill_region_color_by_name(0, text_y_offset, width, font_height, 'black')
-                canvas.draw_text_color_by_name(0, text_y_offset, MPD_FONT, font_height - 2, song, 'grey', pixel_blaster.backend.layer_types.middle)
+                canvas.draw_text_color_by_name(0, text_y_offset, MPD_FONT, font_height - 2, song, 'grey', pixel_yeeter.backend.layer_types.middle)
                 canvas.send_to_screen()
 
                 time.sleep(5)
@@ -87,7 +87,7 @@ def power_usage(queue: queue.Queue):
                     color = 'yellow'
                 else:
                     color = 'green'
-                canvas.draw_text_color_by_name(text_x_offset, 0, font_name, font_height - 2, text, color, pixel_blaster.backend.layer_types.middle)
+                canvas.draw_text_color_by_name(text_x_offset, 0, font_name, font_height - 2, text, color, pixel_yeeter.backend.layer_types.middle)
                 canvas.send_to_screen()
             except Exception as e:
                 print(f'power usage on_message failed: {e} ({e.__traceback__.tb_lineno})')
@@ -221,8 +221,8 @@ while True:
             pass
 
         canvas.clear_back()
-        canvas.draw_sparkline_color_by_name(0, 0, height, pu_values, 'red', pixel_blaster.backend.layer_types.back)
-        canvas.draw_sparkline_color_by_name(0, 0, height, btc_values, 'blue', pixel_blaster.backend.layer_types.back)
+        canvas.draw_sparkline_color_by_name(0, 0, height, pu_values, 'red', pixel_yeeter.backend.layer_types.back)
+        canvas.draw_sparkline_color_by_name(0, 0, height, btc_values, 'blue', pixel_yeeter.backend.layer_types.back)
         canvas.send_to_screen()
 
         # scroller
@@ -230,7 +230,7 @@ while True:
             text = scroller_queue.get(timeout = 0.1)
             if not scroller_since is None:
                 canvas.remove_animation(scroller_name)
-            canvas.add_animation(scroller_name, pixel_blaster.frontend.scroll_text(canvas, 'white', text))
+            canvas.add_animation(scroller_name, pixel_yeeter.frontend.scroll_text(canvas, 'white', text))
             scroller_since = time.time()
         except queue.Empty:
             pass

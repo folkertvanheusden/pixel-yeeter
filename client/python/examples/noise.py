@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 
-import pixel_blaster.backend_ddp
+import pixel_yeeter.backend_ddp
 import random
 import sys
 import time
 
 
-b = pixel_blaster.backend_ddp.backend_ddp('192.168.65.140', 4048, (64, 32))
+b = pixel_yeeter.backend_ddp.backend_ddp('192.168.65.140', 4048, (64, 32))
 
 start_ts = time.time()
 prev_ts = start_ts

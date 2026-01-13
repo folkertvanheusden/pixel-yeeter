@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 
-import pixel_blaster
+import pixel_yeeter
 import random
 import time
 
 
-canvas = pixel_blaster.frontend.frontend(pixel_blaster.backend_ddp.backend_ddp('192.168.65.140', 4048, (64, 32)))
+canvas = pixel_yeeter.frontend.frontend(pixel_yeeter.backend_ddp.backend_ddp('192.168.65.140', 4048, (64, 32)))
 width, height = canvas.get_resolution()
 canvas.clear_screen()
 for y in range(height):

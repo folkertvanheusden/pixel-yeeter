@@ -1,5 +1,5 @@
 from PIL import Image, ImageColor, ImageDraw, ImageFont
-from pixel_blaster import backend
+from pixel_yeeter import backend
 import colorsys
 import threading
 import time
