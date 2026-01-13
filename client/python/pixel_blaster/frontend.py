@@ -100,6 +100,11 @@ class frontend:
             rgb_values = [pil_canvas.getpixel((x, y)) for x in range(0, pil_canvas.width)]
             self.b.set_pixels_horizontal(x_offset, y_use, rgb_values, overlay)
 
+    def get_text_width(self, font_name: str, font_height: float, text: str) -> int:
+        font = ImageFont.truetype(font_name, font_height)
+        text_dimensions = font.getbbox(text)
+        return text_dimensions[2]
+
     def draw_text(self, x: int, y: int, font_name: str, font_height: float, text: str, r: int, g: int, b: int, overlay: bool = False) -> None:
         font = ImageFont.truetype(font_name, font_height)
         text_dimensions = font.getbbox(text)
@@ -110,7 +115,7 @@ class frontend:
 
     def draw_text_color_by_name(self, x: int, y: int, font_name: str, font_height: float, text: str, color: str, overlay: bool = False) -> None:
         r, g, b, a = self.color_name_to_rgb_alpha(color)
-        self.draw_text(x, y, font_name, font_height, text, r, g, b, a, overlay)
+        self.draw_text(x, y, font_name, font_height, text, r, g, b, overlay)
 
     def draw_sparkline_rgb(self, x: int, y: int, height: int, values: list[float], r: int, g: int, b: int, a: int = 255, overlay: bool = False) -> None:
         if len(values) >= 2:
@@ -128,7 +133,7 @@ class frontend:
         self.draw_sparkline_rgb(x, y, height, values, r, g, b, a, overlay)
 
     def fill_region_rgb(self, x: int, y: int, width: int, height: int, r: int, g: int, b: int, a: int = 255, overlay: bool = False) -> None:
-        rgb_values = [r, g, b, a] * width
+        rgb_values = [(r, g, b, a)] * width
         for work_y in range(y, y + height):
             self.b.set_pixels_horizontal(x, work_y, rgb_values, overlay)
 
