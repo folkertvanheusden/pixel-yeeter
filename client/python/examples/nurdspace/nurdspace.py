@@ -13,6 +13,7 @@ import time
 MQTT_POWER_HOST = 'mqtt.vm.nurd.space'
 MQTT_POWER_PORT = 1883
 MQTT_POWER_TOPIC = 'ha-bridge/sensor.power'
+POWER_FONT = 'NotoSerif-Black.ttf'
 
 MQTT_BTC_HOST = 'vps001.vanheusden.com'
 MQTT_BTC_PORT = 1883
@@ -24,6 +25,7 @@ DDP_DIM = (64, 32)
 
 MPD_HOST = 'spacesound.vm.nurd.space'
 MPD_PORT = '6600'
+MPD_FONT = 'NotoSerif-Black.ttf'
 
 SCROLLER_PORT = 5001
 
@@ -55,7 +57,7 @@ def mpd():
                 font_height = 13
                 text_y_offset = height - font_height
                 canvas.fill_region_color_by_name(0, text_y_offset, width, font_height, 'black')
-                canvas.draw_text_color_by_name(0, text_y_offset, 'NotoSerif-Black.ttf', font_height - 2, song, 'grey', pixel_blaster.backend.layer_types.middle)
+                canvas.draw_text_color_by_name(0, text_y_offset, MPD_FONT, font_height - 2, song, 'grey', pixel_blaster.backend.layer_types.middle)
                 canvas.send_to_screen()
 
                 time.sleep(5)
@@ -75,7 +77,7 @@ def power_usage(queue: queue.Queue):
                 power_value = float(message.payload.decode('utf-8'))
                 queue.put(power_value)
                 text = f'{int(power_value)} W'
-                font_name = 'NotoSerif-Black.ttf'
+                font_name = POWER_FONT
                 font_height = 13
                 text_x_offset = width - canvas.get_text_width(font_name, font_height, text)
                 canvas.fill_region_color_by_name(text_x_offset, 0, width, font_height, 'black')
