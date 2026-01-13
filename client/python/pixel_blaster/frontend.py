@@ -1,5 +1,4 @@
-from matplotlib import colors
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageColor, ImageDraw, ImageFont
 from pixel_blaster import backend
 import colorsys
 import threading
@@ -44,19 +43,15 @@ class frontend:
     def clear_overlay(self) -> None:
         self.b.clear_overlay()
 
-    def color_name_to_rgb_alpha(self, color: str) -> list[int, int, int, int]:
-        try:
-            r, g, b, a = colors.to_rgba(color)
-            return int(r * 255), int(g * 255), int(b * 255), int(a * 255)
-        except ValueError as v:
-            return 127, 127, 127, 255
-
     def color_name_to_rgb(self, color: str) -> list[int, int, int]:
         try:
-            r, g, b, a = colors.to_rgba(color)
-            return int(r * 255), int(g * 255), int(b * 255)
+            return ImageColor.getrgb(color)
         except ValueError as v:
             return 127, 127, 127
+
+    def color_name_to_rgb_alpha(self, color: str) -> list[int, int, int, int]:
+        rgb = self.color_name_to_rgb(color)
+        return rgb[0], rgb[1], rgb[2], 255
 
     def set_pixel_color_by_name(self, x: int, y: int, color: str) -> None:
         r, g, b, a = self.color_name_to_rgb_alpha(color)
