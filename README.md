@@ -9,3 +9,8 @@ usage
 === Pixelflood server for the Raspberry PI
 
 * server/HUB75/raspberry_pi/pixelflood
+
+
+=== Drawing
+
+* in client/python you'll find a library for drawing on the RGB LED matrixes
