@@ -38,10 +38,10 @@ class backend_ddp(backend.backend):
                 p_offset = offset = 0
                 for y in range(self.height):
                     for x in range(self.width):
-                        r, g, b = self.get_pixel(x, y)
-                        buffer.append(r)
-                        buffer.append(g)
-                        buffer.append(b)
+                        r, g, b, a = self.get_pixel_alpha(x, y)
+                        buffer.append(r * a // 256)
+                        buffer.append(g * a // 256)
+                        buffer.append(b * a // 256)
                         offset += 3
 
                         if len(buffer) > 1440 - 3:
