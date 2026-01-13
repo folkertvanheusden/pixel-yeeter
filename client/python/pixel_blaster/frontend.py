@@ -34,6 +34,12 @@ class frontend:
         del self._runner_work_items[name]
         self._runner_lock.release()
 
+    def get_animation(self, name: str):
+        self._runner_lock.acquire()
+        rc = self._runner_work_items[name]
+        self._runner_lock.release()
+        return rc
+
     def get_resolution(self) -> list[int, int]:
         return self.b.get_width(), self.b.get_height()
 
@@ -150,13 +156,17 @@ class frontend:
 
 class animation:
     def __init__(self):
-        pass
+        self.run_count = 0
+
+    def get_run_count(self) -> int:
+        return self.run_count
 
     def tick(self, f: frontend) -> None:
         pass
 
 class scroll_text(animation):
     def __init__(self, f: frontend, color_name: str, text: str, font_name: str = 'FreeSerif'):
+        super().__init__()
         self.text = text
         self.f = f
         self.target_width = f.get_resolution()[0]
@@ -182,3 +192,4 @@ class scroll_text(animation):
             self.x -= 1
             if self.x < -self.text_width:
                 self.x = self.target_width
+                self.run_count += 1

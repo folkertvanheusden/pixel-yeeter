@@ -12,7 +12,7 @@ import time
 
 MQTT_POWER_HOST = 'mqtt.vm.nurd.space'
 MQTT_POWER_PORT = 1883
-MQTT_POWER_TOPIC = 'ha-bridge/sensor.filtered_power'
+MQTT_POWER_TOPIC = 'ha-bridge/sensor.power'
 
 MQTT_BTC_HOST = 'vps001.vanheusden.com'
 MQTT_BTC_PORT = 1883
@@ -208,7 +208,7 @@ while True:
 
         if not scroller_since is None:
             now = time.time()
-            if now - scroller_since >= 10.0:
+            if now - scroller_since >= 10.0 and canvas.get_animation(scroller_name).get_run_count() >= 2:
                 canvas.remove_animation(scroller_name)
                 scroller_since = None
                 canvas.clear_front()
