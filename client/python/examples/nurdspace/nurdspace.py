@@ -27,6 +27,9 @@ MPD_PORT = '6600'
 
 SCROLLER_PORT = 5001
 
+HTTP_INTERFACE = '0.0.0.0'
+HTTP_PORT = 8000
+
 canvas = pixel_blaster.frontend.frontend(pixel_blaster.backend_ddp.backend_ddp(DDP_HOST, DDP_PORT, DDP_DIM))
 width, height = canvas.get_resolution()
 
@@ -166,6 +169,30 @@ scroller_queue = queue.Queue()
 t_scroller = threading.Thread(target=scroller, args=(scroller_queue,))
 t_scroller.start()
 scroller_name = 'scroller_msg'
+
+def http_rest(queue):
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+
+    class http_server(BaseHTTPRequestHandler):
+        def do_POST(self):
+            if self.path == '/':
+                try:
+                    length = int(self.headers.get('content-length'))
+                    msg = self.rfile.read(length)
+                    queue.put(msg.decode('ascii'))
+                    self.send_response(200)
+                except Exception as e:
+                    print(f'http_rest (POST) failed: {e} ({e.__traceback__.tb_lineno})')
+                    self.send_response(500)
+            else:
+                self.send_response(404)
+            self.end_headers()
+
+    httpd = HTTPServer((HTTP_INTERFACE, HTTP_PORT), http_server)
+    httpd.serve_forever()
+
+t_http = threading.Thread(target=http_rest, args=(scroller_queue,))
+t_http.start()
 
 pu_values = []
 btc_values = []
