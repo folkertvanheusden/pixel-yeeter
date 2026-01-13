@@ -33,7 +33,7 @@ class backend:
             self.fb[o + 3] = a & 255
 
     def set_pixels_horizontal(self, x: int, y: int, values: list[list[int]]) -> None:
-        if len(values) == 0:
+        if len(values) == 0 or y >= self.height or y < 0:
             return
         offset_y = self.width * y * 4
         if len(values[0]) == 4:
