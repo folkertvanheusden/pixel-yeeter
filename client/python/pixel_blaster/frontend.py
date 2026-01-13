@@ -57,13 +57,13 @@ class frontend:
 
     def set_pixel_color_by_name(self, x: int, y: int, color: str) -> None:
         r, g, b, a = self.color_name_to_rgb_alpha(color)
-        self.b.set_pixel(x, y, r, g, b, a)
+        self.b.set_pixel_alpha(x, y, r, g, b, a)
 
     # r/g/b: 0...255
-    def set_pixel_rgb(self, x: int, y: int, r: int, g: int, b: int) -> None:
-        self.b.set_pixel(x, y, r, g, b)
+    def set_pixel_rgb(self, x: int, y: int, r: int, g: int, b: int, a: int = 255) -> None:
+        self.b.set_pixel_alpha(x, y, r, g, b, a)
 
-    def draw_line_rgb(self, x_start: int, y_start: int, x_end: int, y_end: int, r: int, g: int, b: int) -> None:
+    def draw_line_rgb(self, x_start: int, y_start: int, x_end: int, y_end: int, r: int, g: int, b: int, a: int = 255) -> None:
         dx = x_end - x_start
         dy = y_end - y_start
         steep = abs(dy) > abs(dx)
@@ -84,7 +84,7 @@ class frontend:
         y = y_start
         for x in range(x_start, x_end + 1):
             coord = (y, x) if steep else (x, y)
-            self.b.set_pixel(coord[0], coord[1], r, g, b)
+            self.b.set_pixel_alpha(coord[0], coord[1], r, g, b, a)
             error -= abs(dy)
             if error < 0:
                 y += ystep
@@ -105,7 +105,7 @@ class frontend:
     def draw_text(self, x: int, y: int, font_name: str, font_height: float, text: str, r: int, g: int, b: int) -> None:
         font = ImageFont.truetype(font_name, font_height)
         text_dimensions = font.getbbox(text)
-        image = Image.new('RGB', (text_dimensions[2], text_dimensions[3]))
+        image = Image.new('RGBA', (text_dimensions[2], text_dimensions[3]))
         pil_canvas = ImageDraw.Draw(image)
         pil_canvas.text((0, 0), text, (r, g, b), font = font)
         self.draw_pil_Image(image, x, y)
@@ -114,14 +114,14 @@ class frontend:
         r, g, b, a = self.color_name_to_rgb_alpha(color)
         self.draw_text(x, y, font_name, font_height, text, r, g, b, a)
 
-    def draw_sparkline_rgb(self, x: int, y: int, height: int, values: list[float], r: int, g: int, b: int) -> None:
+    def draw_sparkline_rgb(self, x: int, y: int, height: int, values: list[float], r: int, g: int, b: int, a: int = 255) -> None:
         if len(values) >= 2:
             mn, mx = min(values), max(values)
             extent = mx - mn
             scaled = [int((v - mn) / extent * height) for v in values]
             y_prev_offset = scaled[0]
             for y_offset in scaled[1:]:
-                self.draw_line_rgb(x, y + y_prev_offset, x + 1, y + y_offset, r, g, b)
+                self.draw_line_rgb(x, y + y_prev_offset, x + 1, y + y_offset, r, g, b, a)
                 x += 1
                 y_prev_offset = y_offset
 
@@ -129,10 +129,10 @@ class frontend:
         r, g, b, a = self.color_name_to_rgb_alpha(color)
         self.draw_sparkline_rgb(x, y, height, values, r, g, b, a)
 
-    def fill_region_rgb(self, x: int, y: int, width: int, height: int, r: int, g: int, b: int) -> None:
+    def fill_region_rgb(self, x: int, y: int, width: int, height: int, r: int, g: int, b: int, a: int = 255) -> None:
+        rgb_values = [r, g, b, a] * width
         for work_y in range(y, y + height):
-            for work_x in range(x, x + width):
-                self.b.set_pixel(work_x, work_y, r, g, b)
+            self.b.set_pixels_horizontal(x, work_y, rgb_values)
 
     def fill_region_color_by_name(self, x: int, y: int, width: int, height: int, color: str) -> None:
         r, g, b, a = self.color_name_to_rgb_alpha(color)
