@@ -44,8 +44,23 @@ canvas.draw_line_rgb(0, 0, width, height, 0, 255, 0)
 canvas.draw_line_color_by_name(width, 0, 0, height, 'red')
 ```
 
-Send all (!) layers combined to the DDP or PixelFlood display server.
+Send all (!) layers combined to the DDP or PixelFlood display server. Whenever you've drawn anything and want it to be made visible, invoke this.
 
 ```python
 canvas.send_to_screen()
+```
+
+Draw a 'sparkline' (see microsoft-excel - it is a graph). The 0,0 in this example are the coordinates to start drawing. The height is determined by the `height` variable and the width depends on the number of values in `values`.
+```python
+canvas.draw_sparkline_color_by_name(0, 0, height, values, 'green')
+```
+
+Add a scroll-text which runs on te `front` layer. No need to do anything, it runs by itself. When you have enough of it, invoke `canvas.remove_animation('some_message')` - `some_message` is the identifier of this scroll-text.
+```python
+canvas.add_animation('some_message', pixel_yeeter.frontend.scroll_text(canvas, 'white', 'Hello, world!'))
+```
+
+This library is compatible with `PIL / pillow`, the Python library for drawing on images. You can draw whatever you want on a PIL-image structure and then place it on the pixel-yeeter display using:
+```python
+anvas.draw_pil_Image(pil_image, x, y)
 ```
