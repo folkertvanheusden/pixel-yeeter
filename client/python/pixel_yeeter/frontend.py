@@ -114,6 +114,48 @@ class frontend:
         text_dimensions = font.getbbox(text)
         return text_dimensions[2]
 
+    def prepare_text(self, font_name_or_names: str | list, font_height: float, text: str, r: int, g: int, b: int, a: int) -> list[Image, int, int]:
+        def font_has_glyph(font, ch):
+            try:
+                mask = font.getmask(ch)
+                return mask.size[0] > 0 and mask.size[1] > 0
+            except:
+                return False
+
+        def pick_best_font_for_str(fonts, str_):
+            best_count = -1
+            best_font = fonts[-1]
+            for font in fonts:
+                count = 0
+                for c in str_:
+                    if font_has_glyph(font, c):
+                        count += 1
+                if count == len(str_):
+                    return font
+                if count > best_count:
+                    best_count = count
+                    best_font = font
+            return fonts[-1]   # fallback
+
+        if type(font_name_or_names) == str:
+            font = ImageFont.truetype(font_name_or_names, font_height)
+        else:
+            fonts = []
+            for font_name in font_name_or_names:
+                try:
+                    fonts.append(ImageFont.truetype(font_name, font_height))
+                except Exception as e:
+                    print(f'Font {font_name} is not usable for height {font_height}: {e}')
+            font = pick_best_font_for_str(fonts, text)
+        text_dimensions = font.getbbox(text)
+        image = Image.new('RGBA', (text_dimensions[2], text_dimensions[3]))
+        pil_canvas = ImageDraw.Draw(image)
+        pil_canvas.text((0, 0), text, (r, g, b, a), font = font)
+        return image, text_dimensions[2], text_dimensions[3]
+
+    def draw_prepared_text(self, prepared_text: list[Image, int, int], x: int, y: int, layer: backend.layer_types = backend.layer_types.middle):
+        self.draw_pil_Image(prepared_text[0], x, y, layer)
+
     def draw_text(self, x: int, y: int, font_name: str, font_height: float, text: str, r: int, g: int, b: int, layer: backend.layer_types = backend.layer_types.middle) -> None:
         font = ImageFont.truetype(font_name, font_height)
         text_dimensions = font.getbbox(text)
@@ -165,7 +207,7 @@ class animation:
         pass
 
 class scroll_text(animation):
-    def __init__(self, f: frontend, color_name: str, text: str, font_name: str = 'FreeSerif', speed: int = 10):
+    def __init__(self, f: frontend, color_name: str, text: str, font_name_or_names: str | list = 'FreeSerif', speed: int = 10):
         super().__init__()
         self.text = text
         self.f = f
@@ -174,12 +216,10 @@ class scroll_text(animation):
         self.clock = 0
         self.speed = speed
 
-        font = ImageFont.truetype(font_name, f.get_resolution()[1])
-        text_dimensions = font.getbbox(self.text)
-        self.image = Image.new('RGBA', (text_dimensions[2], text_dimensions[3]))
-        self.text_width = text_dimensions[2]
-        pil_canvas = ImageDraw.Draw(self.image)
-        pil_canvas.text((0, 0), text, f.color_name_to_rgb_alpha(color_name), font = font)
+        r, g, b, a = f.color_name_to_rgb_alpha(color_name)
+        prepared_text = f.prepare_text(font_name_or_names, f.get_resolution()[1], text, r, g, b, a)
+        self.image = prepared_text[0]
+        self.text_width = prepared_text[1]
 
     def tick(self, f: frontend) -> None:
         if self.x == None:
