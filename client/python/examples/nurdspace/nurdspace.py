@@ -13,7 +13,7 @@ import time
 MQTT_POWER_HOST = 'mqtt.vm.nurd.space'
 MQTT_POWER_PORT = 1883
 MQTT_POWER_TOPIC = 'ha-bridge/sensor.power'
-POWER_FONT = 'NotoSerif-Black.ttf'
+POWER_FONT = 'Courier_New.ttf'
 
 MQTT_BTC_HOST = 'vps001.vanheusden.com'
 MQTT_BTC_PORT = 1883
@@ -26,9 +26,9 @@ DDP_DIM = (128, 32)
 
 MPD_HOST = 'spacesound.vm.nurd.space'
 MPD_PORT = '6600'
-MPD_FONT = 'NotoSerif-Black.ttf'
+MPD_FONT = 'Courier_New.ttf'
 
-SCROLLER_PORT = 5001
+SCROLLER_PORT = 50010
 SCROLLER_FONT = 'Courier_New.ttf'
 SCROLLER_SPEED = 1  # bigger value is slower, minimum is 1
 
@@ -90,7 +90,7 @@ def power_usage(queue: queue.Queue):
                     color = 'yellow'
                 else:
                     color = 'green'
-                canvas.draw_text_color_by_name(text_x_offset, 0, font_name, font_height - 2, text, color, pixel_yeeter.backend.layer_types.middle)
+                canvas.draw_text_color_by_name(text_x_offset, 0, font_name, font_height - 1, text, color, pixel_yeeter.backend.layer_types.middle)
                 canvas.send_to_screen()
             except Exception as e:
                 print(f'power usage on_message failed: {e} ({e.__traceback__.tb_lineno})')
