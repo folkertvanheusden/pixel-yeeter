@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 import pixel_yeeter.backend
 import pixel_yeeter.backend_ddp
@@ -27,6 +27,7 @@ DDP_DIM = (128, 32)
 MPD_HOST = 'spacesound.vm.nurd.space'
 MPD_PORT = '6600'
 MPD_FONT = 'Courier_New.ttf'
+MPD_FONT_HEIGHT = 13
 
 SCROLLER_PORT = 50010
 SCROLLER_FONT = 'Courier_New.ttf'
@@ -57,10 +58,9 @@ def mpd():
                 if 'name' in cs:
                     song += ' - ' + cs['name']
 
-                font_height = 13
-                text_y_offset = height - font_height
-                canvas.fill_region_color_by_name(0, text_y_offset, width, font_height, 'black')
-                canvas.draw_text_color_by_name(0, text_y_offset, MPD_FONT, font_height - 2, song, 'grey', pixel_yeeter.backend.layer_types.middle)
+                text_y_offset = height - MPD_FONT_HEIGHT
+                canvas.fill_region_color_by_name(0, text_y_offset, width, MPD_FONT_HEIGHT, 'black')
+                canvas.draw_text_color_by_name(0, text_y_offset, MPD_FONT, MPD_FONT_HEIGHT - 2, song, 'grey', pixel_yeeter.backend.layer_types.middle)
                 canvas.send_to_screen()
 
                 time.sleep(5)
@@ -224,8 +224,8 @@ while True:
             pass
 
         canvas.clear_back()
-        canvas.draw_sparkline_color_by_name(0, 0, height, pu_values, 'red', pixel_yeeter.backend.layer_types.back)
-        canvas.draw_sparkline_color_by_name(0, 0, height, btc_values, 'blue', pixel_yeeter.backend.layer_types.back)
+        canvas.draw_sparkline_color_by_name(0, 0, height - MPD_FONT_HEIGHT, pu_values, 'red', pixel_yeeter.backend.layer_types.back)
+        canvas.draw_sparkline_color_by_name(0, 0, height - MPD_FONT_HEIGHT, btc_values, 'blue', pixel_yeeter.backend.layer_types.back)
         canvas.send_to_screen()
 
         # scroller
