@@ -30,7 +30,10 @@ MPD_FONT = 'Courier_New.ttf'
 MPD_FONT_HEIGHT = 13
 
 SCROLLER_PORT = 50010
-SCROLLER_FONT = 'Courier_New.ttf'
+#SCROLLER_FONT = 'Courier_New.ttf'
+#SCROLLER_FONT = './unifont-15.0.01.ttf'
+#SCROLLER_FONT = './unifont-17.0.03.otf'
+SCROLLER_FONT = './UnifontExMono.ttf'
 SCROLLER_SPEED = 1  # bigger value is slower, minimum is 1
 
 HTTP_INTERFACE = '0.0.0.0'
