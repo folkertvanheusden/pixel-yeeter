@@ -30,7 +30,7 @@ MPD_FONT = 'Courier_New.ttf'
 MPD_FONT_HEIGHT = 13
 
 SCROLLER_PORT = 50010
-SCROLLER_FONT = './UnifontExMono.ttf'
+SCROLLER_FONT = '/home/nurds/pixel-yeeter/client/python/examples/nurdspace/UnifontExMono.ttf'
 SCROLLER_SPEED = 1  # bigger value is slower, minimum is 1
 
 HTTP_INTERFACE = '0.0.0.0'
@@ -82,7 +82,7 @@ def power_usage(queue: queue.Queue):
                 text = f'{int(power_value)} W'
                 font_name = POWER_FONT
                 font_height = 13
-                text_x_offset = width - canvas.get_text_width(font_name, font_height, text)
+                text_x_offset = width - canvas.get_text_width(font_name, font_height, '9999 W')
                 canvas.fill_region_color_by_name(text_x_offset, 0, width, font_height, 'black')
                 if power_value > 1000:
                     color = 'red'
