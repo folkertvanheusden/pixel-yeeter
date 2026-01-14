@@ -19,9 +19,10 @@ MQTT_BTC_HOST = 'vps001.vanheusden.com'
 MQTT_BTC_PORT = 1883
 MQTT_BTC_TOPIC = 'vanheusden/bitcoin/bitstamp_usd'
 
-DDP_HOST = '192.168.65.140'
+#DDP_HOST = '192.168.65.140'
+DDP_HOST = '10.208.1.48'
 DDP_PORT = 4048
-DDP_DIM = (64, 32)
+DDP_DIM = (128, 32)
 
 MPD_HOST = 'spacesound.vm.nurd.space'
 MPD_PORT = '6600'
