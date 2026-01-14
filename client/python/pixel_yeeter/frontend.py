@@ -165,13 +165,14 @@ class animation:
         pass
 
 class scroll_text(animation):
-    def __init__(self, f: frontend, color_name: str, text: str, font_name: str = 'FreeSerif'):
+    def __init__(self, f: frontend, color_name: str, text: str, font_name: str = 'FreeSerif', speed: int = 10):
         super().__init__()
         self.text = text
         self.f = f
         self.target_width = f.get_resolution()[0]
         self.x = None
         self.clock = 0
+        self.speed = speed
 
         font = ImageFont.truetype(font_name, f.get_resolution()[1])
         text_dimensions = font.getbbox(self.text)
@@ -185,7 +186,7 @@ class scroll_text(animation):
             self.x = self.target_width
 
         self.clock += 1
-        if self.clock == 10:
+        if self.clock == self.speed:
             self.clock = 0
             f.clear_front()
             f.draw_pil_Image(self.image, self.x, 0, backend.layer_types.front)

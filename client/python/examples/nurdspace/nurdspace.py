@@ -29,6 +29,8 @@ MPD_PORT = '6600'
 MPD_FONT = 'NotoSerif-Black.ttf'
 
 SCROLLER_PORT = 5001
+SCROLLER_FONT = 'Courier_New.ttf'
+SCROLLER_SPEED = 1  # bigger value is slower, minimum is 1
 
 HTTP_INTERFACE = '0.0.0.0'
 HTTP_PORT = 8000
@@ -231,7 +233,7 @@ while True:
             text = scroller_queue.get(timeout = 0.1)
             if not scroller_since is None:
                 canvas.remove_animation(scroller_name)
-            canvas.add_animation(scroller_name, pixel_yeeter.frontend.scroll_text(canvas, 'white', text))
+            canvas.add_animation(scroller_name, pixel_yeeter.frontend.scroll_text(canvas, 'white', text, font_name=SCROLLER_FONT, speed=SCROLLER_SPEED))
             scroller_since = time.time()
         except queue.Empty:
             pass
