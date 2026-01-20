@@ -11,7 +11,7 @@ add_definitions("-D_FILE_OFFSET_BITS=64")
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 if (ASAN EQUAL 1)
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined -static-libasan")
         MESSAGE("WITH ASAN (and USAN)")
 else()
 	MESSAGE("without ASAN/USAN")
