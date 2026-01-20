@@ -2,7 +2,9 @@
 #include <cstring>
 #include <functional>
 #include <string>
+#include <unistd.h>
 #include <vector>
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 
@@ -56,9 +58,9 @@ bool handle_ddp_payload_binary(const uint8_t *const buffer, const size_t n, cons
 
 void handle_ddp_status_request(const int fd, const sockaddr_in6 & addr, const socklen_t len)
 {
-	std::string msg = "{\"status\" { \"man\": \"www.vanheusden.com\", \"mod\": \"hub75 ddp server\", \"ver\": \"0.1\", \"push\": true, \"ntp\": false } }";
-	size_t total_len = 10 + msg.size();
-	uint8_t *buffer = new uint8_t[total_len]();
+	std::string msg       = "{\"status\" { \"man\": \"www.vanheusden.com\", \"mod\": \"hub75 ddp server\", \"ver\": \"0.1\", \"push\": true, \"ntp\": false } }";
+	size_t      total_len = 10 + msg.size();
+	uint8_t    *buffer    = new uint8_t[total_len]();
 
 	buffer[0] = 64 | 4 | 1;  // version_1, reply, push
 	buffer[3] = 251;  // json status
@@ -93,4 +95,59 @@ void handle_ddp_client_datagram(const int fd, const int width, int const height,
 				put_pixels();
 		}
 	}
+}
+
+void transmit_ddp_broadcast(const int port)
+{
+	int fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd == -1) {
+		fprintf(stderr, "Failed to create socket\n");
+		return;
+	}
+
+	int flag = 1;
+	if (setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &flag, sizeof flag) == -1) {
+		close(fd);
+		fprintf(stderr, "Failed to setsockopt(broadcast)\n");
+		return;
+	}
+
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof flag) == -1) {
+		close(fd);
+		fprintf(stderr, "Failed to setsockopt(reuseaddress)\n");
+		return;
+	}
+
+	sockaddr_in recv_addr { };
+	recv_addr.sin_family      = AF_INET;
+	recv_addr.sin_port        = htons(port);
+	recv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	if (bind(fd, reinterpret_cast<sockaddr *>(&recv_addr), sizeof recv_addr) == -1) {
+		close(fd);
+		fprintf(stderr, "Failed to setsockopt(reuseaddress)\n");
+		return;
+	}
+
+	std::string msg       = "{\"status\" { \"man\": \"www.vanheusden.com\", \"mod\": \"hub75 ddp server\", \"ver\": \"0.1\" } }";
+	size_t      total_len = 10 + msg.size();
+	uint8_t    *buffer    = new uint8_t[total_len]();
+
+	buffer[0] = 64 | 4 | 1;  // version_1, reply, push
+	buffer[3] = 251;  // json status
+	buffer[8] = msg.size() >> 8;
+	buffer[9] = msg.size();
+	memcpy(&buffer[10], msg.c_str(), msg.size());
+
+	sockaddr_in send_addr { };
+	send_addr.sin_family      = AF_INET;
+	send_addr.sin_port        = htons(port);
+	send_addr.sin_addr.s_addr = htonl(-1);
+	inet_aton("255.255.255.255", &send_addr.sin_addr);
+        if (sendto(fd, buffer, total_len, 0, reinterpret_cast<sockaddr *>(&recv_addr), sizeof send_addr) == -1) {
+		close(fd);
+		fprintf(stderr, "Failed to sendto\n");
+		return;
+	}
+
+	close(fd);
 }

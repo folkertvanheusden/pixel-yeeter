@@ -95,9 +95,22 @@ int main(int argc, char *argv[])
 	close(pixelflood_udp_txt_fd);
 
 	// DDP
-	int ddp_udp_bin_fd = start_udp_listen("0.0.0.0", 4048);
-	handle_ddp_client_datagram(ddp_udp_bin_fd, draw_canvas->width(), draw_canvas->height(), draw_pixels, put_pixels);
-	close(ddp_udp_bin_fd);
+	std::thread t_ddp_tcp([&] {
+		int ddp_udp_bin_fd = start_udp_listen("0.0.0.0", 4048);
+		handle_ddp_client_datagram(ddp_udp_bin_fd, draw_canvas->width(), draw_canvas->height(), draw_pixels, put_pixels);
+		close(ddp_udp_bin_fd);
+	});
+	t_ddp_tcp.detach();
+
+	std::thread t_ddp_broadcast([&] {
+		for(;;) {
+			transmit_ddp_broadcast(4048);
+			sleep(5);
+		}
+	});
+
+	for(;;)
+		sleep(3600);
 
 	delete [] frame_buffer;
 
