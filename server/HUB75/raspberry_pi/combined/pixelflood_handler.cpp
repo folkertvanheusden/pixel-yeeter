@@ -32,7 +32,7 @@ int hextonibble(const char c)
 	return cu - '0';
 }
 
-std::optional<std::string> handle_pixelflood_payload_text(char *const buffer, size_t *const n, size_t *const offset, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
+std::optional<std::string> handle_pixelflood_payload_text(char *const buffer, size_t *const n, size_t *const offset, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels, std::function<void()> put_pixels)
 {
 	std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > pixels;
 
@@ -87,11 +87,12 @@ std::optional<std::string> handle_pixelflood_payload_text(char *const buffer, si
 	}
 
 	draw_pixels(pixels);
+	put_pixels();
 
 	return { };
 }
 
-void handle_pixelflood_client_stream_text(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
+void handle_pixelflood_client_stream_text(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels, std::function<void()> put_pixels)
 {
 	char   buffer[65536];
 	size_t n      = 0;
@@ -106,13 +107,13 @@ void handle_pixelflood_client_stream_text(const int fd, const int width, const i
 
 		n += rc;
 
-		auto reply = handle_pixelflood_payload_text(buffer, &n, &offset, width, height, draw_pixels);
+		auto reply = handle_pixelflood_payload_text(buffer, &n, &offset, width, height, draw_pixels, put_pixels);
 		if (reply.has_value())
 			WRITE(fd, reply.value().c_str(), reply.value().size());
 	}
 }
 
-void handle_pixelflood_client_datagram_text(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
+void handle_pixelflood_client_datagram_text(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels, std::function<void()> put_pixels)
 {
 	char buffer[65536];
 
@@ -128,14 +129,14 @@ void handle_pixelflood_client_datagram_text(const int fd, const int width, const
 		size_t n      = rc;
 		size_t offset = 0;
 
-		auto reply = handle_pixelflood_payload_text(buffer, &n, &offset, width, height, draw_pixels);
+		auto reply = handle_pixelflood_payload_text(buffer, &n, &offset, width, height, draw_pixels, put_pixels);
 		if (reply.has_value())
 			sendto(fd, reply.value().c_str(), reply.value().size(), 0, reinterpret_cast<sockaddr *>(&addr), addr_len);
 	}
 }
 
 // https://github.com/JanKlopper/pixelvloed/blob/master/protocol.md
-void handle_pixelflood_payload_binary(uint8_t *const buffer, const size_t n, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
+void handle_pixelflood_payload_binary(uint8_t *const buffer, const size_t n, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels, std::function<void()> put_pixels)
 {
 	if (buffer[0]) {
 		fprintf(stderr, "Protocol version %d not supported yet\n", buffer[0]);
@@ -159,9 +160,10 @@ void handle_pixelflood_payload_binary(uint8_t *const buffer, const size_t n, con
 	}
 
 	draw_pixels(pixels);
+	put_pixels();
 }
 
-void handle_pixelflood_client_datagram_binary(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels)
+void handle_pixelflood_client_datagram_binary(const int fd, const int width, const int height, std::function<void(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > &)> draw_pixels, std::function<void()> put_pixels)
 {
 	uint8_t buffer[1122 + 9];  // as per protocol, +9 so not to require bound checks
 
@@ -174,6 +176,6 @@ void handle_pixelflood_client_datagram_binary(const int fd, const int width, con
 		if (rc == 0)
 			continue;
 
-		handle_pixelflood_payload_binary(buffer, rc, width, height, draw_pixels);
+		handle_pixelflood_payload_binary(buffer, rc, width, height, draw_pixels, put_pixels);
 	}
 }
