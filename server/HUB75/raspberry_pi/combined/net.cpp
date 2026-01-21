@@ -82,3 +82,30 @@ std::string get_endpoint_name(int fd)
 
 	return std::string(host) + "." + std::string(serv);
 }
+
+
+std::pair<int, std::string> get_broadcast_fd(const int port)
+{
+        sockaddr_in addr {};
+        addr.sin_family      = AF_INET;
+        addr.sin_port        = htons(port);
+        addr.sin_addr.s_addr = inet_addr("255.255.255.255");
+
+	int fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd == -1)
+		error_exit(true, "get_broadcast_fd: cannot create socket");
+
+        if (connect(fd, reinterpret_cast<sockaddr *>(&addr), sizeof addr) == -1)
+		error_exit(true, "get_broadcast_fd: cannot connect socket to broadcast address");
+
+	sockaddr_in local { };
+	socklen_t   local_len = sizeof local;
+	if (getsockname(fd, reinterpret_cast<sockaddr *>(&local), &local_len) == -1)
+		error_exit(true, "get_broadcast_fd: getsockname");
+
+	char host[256] { "?" };
+	char serv[256] { "?" };
+	getnameinfo((struct sockaddr *)&local, local_len, host, sizeof host, serv, sizeof serv, NI_NUMERICHOST | NI_NUMERICSERV);
+
+	return { fd, std::string(host) + ":" + std::string(serv) };
+}

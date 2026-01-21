@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstring>
 #include <errno.h>
+#include <format>
 #include <functional>
 #include <optional>
 #include <unistd.h>
@@ -10,6 +11,8 @@
 #include <sys/socket.h>
 
 #include <led-matrix.h>
+
+#include "net.h"
 
 
 bool WRITE(const int fd, const char *p, size_t n)
@@ -178,4 +181,12 @@ void handle_pixelflood_client_datagram_binary(const int fd, const int width, con
 
 		handle_pixelflood_payload_binary(buffer, rc, width, height, draw_pixels, put_pixels);
 	}
+}
+
+void transmit_pixelflood_broadcast(const int port, const int width, const int height)
+{
+	auto bc = get_broadcast_fd(port);
+	std::string packet = std::format("pixelvloed:1.00 {} {}*{}", bc.second, width, height);
+
+	send(bc.first, packet.c_str(), packet.size(), 0);
 }

@@ -106,6 +106,14 @@ int main(int argc, char *argv[])
 	});
 	t_ddp_broadcast.detach();
 
+	std::thread t_pixelflood_broadcast([&] {
+		for(;;) {
+			transmit_pixelflood_broadcast(1337, draw_canvas->width(), draw_canvas->height());
+			sleep(5);
+		}
+	});
+	t_pixelflood_broadcast.detach();
+
 	for(;;)
 		sleep(3600);
 
