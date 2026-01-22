@@ -221,9 +221,10 @@ class scroll_text(animation):
         self.image = prepared_text[0]
 
         new_height = f.get_resolution()[1]
-        new_width  = int(new_height * prepared_text[1] / prepared_text[2])
-        self.image = self.image.resize((new_width, new_height), Image.LANCZOS)
-        self.text_width = new_width
+        if new_height != prepared_text[2]:
+            new_width  = int(new_height * prepared_text[1] / prepared_text[2])
+            self.image = self.image.resize((new_width, new_height), Image.LANCZOS)
+            self.text_width = new_width
 
     def tick(self, f: frontend) -> None:
         if self.x == None:
