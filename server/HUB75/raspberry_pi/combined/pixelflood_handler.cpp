@@ -189,4 +189,6 @@ void transmit_pixelflood_broadcast(const int port, const int width, const int he
 	std::string packet = std::format("pixelvloed:1.00 {} {}*{}", bc.second, width, height);
 
 	send(bc.first, packet.c_str(), packet.size(), 0);
+
+	close(bc.first);
 }
