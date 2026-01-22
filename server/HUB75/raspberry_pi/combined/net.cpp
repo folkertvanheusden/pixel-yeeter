@@ -95,6 +95,10 @@ std::pair<int, std::string> get_broadcast_fd(const int port)
 	if (fd == -1)
 		error_exit(true, "get_broadcast_fd: cannot create socket");
 
+	int yes = 1;
+	if (setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes)) == -1)
+		error_exit(true, "get_broadcast_fd: cannot set socket to broadcast");
+
         if (connect(fd, reinterpret_cast<sockaddr *>(&addr), sizeof addr) == -1)
 		error_exit(true, "get_broadcast_fd: cannot connect socket to broadcast address");
 
