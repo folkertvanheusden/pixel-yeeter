@@ -6,8 +6,11 @@ import random
 import time
 
 
+# requires the Catrinity font from https://catrinity-font.de/
+
 canvas = pixel_yeeter.frontend.frontend(pixel_yeeter.backend_ddp.backend_ddp('192.168.65.140', 4048, (64, 32)))
-canvas.add_animation('some_message', pixel_yeeter.frontend.scroll_text(canvas, 'white', 'Hello, world!'))
+emoji = '\U0001F600\u263A'
+canvas.add_animation('some_message', pixel_yeeter.frontend.scroll_text(canvas, 'white', f'{emoji} Hello, world!', font_name_or_names='Catrinity.otf', font_height=32))
 
 try:
     width, height = canvas.get_resolution()

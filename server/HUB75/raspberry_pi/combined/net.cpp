@@ -111,5 +111,5 @@ std::pair<int, std::string> get_broadcast_fd(const int port)
 	char serv[256] { "?" };
 	getnameinfo((struct sockaddr *)&local, local_len, host, sizeof host, serv, sizeof serv, NI_NUMERICHOST | NI_NUMERICSERV);
 
-	return { fd, std::string(host) + ":" + std::string(serv) };
+	return { fd, std::string(host) + ":" + std::to_string(port) };
 }
