@@ -110,7 +110,7 @@ class frontend:
             self.b.set_pixels_horizontal(x_offset, y_use, rgb_values, layer)
 
     def get_text_width(self, font_name: str, font_height: float, text: str) -> int:
-        font = ImageFont.truetype(font_name, font_height)
+        font = ImageFont.truetype(font_name, font_height, layout_engine=ImageFont.Layout.RAQM)
         text_dimensions = font.getbbox(text)
         return text_dimensions[2]
 
@@ -150,7 +150,7 @@ class frontend:
         text_dimensions = font.getbbox(text)
         image = Image.new('RGBA', (text_dimensions[2], text_dimensions[3]))
         pil_canvas = ImageDraw.Draw(image)
-        pil_canvas.text((0, 0), text, (r, g, b, a), font = font)
+        pil_canvas.text((0, 0), text, (r, g, b, a), font = font, embedded_color=True)
         return image, text_dimensions[2], text_dimensions[3]
 
     def draw_prepared_text(self, prepared_text: list[Image, int, int], x: int, y: int, layer: backend.layer_types = backend.layer_types.middle):
@@ -207,7 +207,7 @@ class animation:
         pass
 
 class scroll_text(animation):
-    def __init__(self, f: frontend, color_name: str, text: str, font_name_or_names: str | list = 'FreeSerif', speed: int = 10):
+    def __init__(self, f: frontend, color_name: str, text: str, font_name_or_names: str | list = 'FreeSerif', speed: int = 10, font_height: int = None):
         super().__init__()
         self.text = text
         self.f = f
@@ -217,9 +217,13 @@ class scroll_text(animation):
         self.speed = speed
 
         r, g, b, a = f.color_name_to_rgb_alpha(color_name)
-        prepared_text = f.prepare_text(font_name_or_names, f.get_resolution()[1], text, r, g, b, a)
+        prepared_text = f.prepare_text(font_name_or_names, f.get_resolution()[1] if font_height is None else font_height, text, r, g, b, a)
         self.image = prepared_text[0]
-        self.text_width = prepared_text[1]
+
+        new_height = f.get_resolution()[1]
+        new_width  = int(new_height * prepared_text[1] / prepared_text[2])
+        self.image = self.image.resize((new_width, new_height), Image.LANCZOS)
+        self.text_width = new_width
 
     def tick(self, f: frontend) -> None:
         if self.x == None:
