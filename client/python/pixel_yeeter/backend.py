@@ -63,27 +63,15 @@ class backend:
             reference[o + 2] = b & 255
             reference[o + 3] = a & 255
 
-    def set_pixels_horizontal(self, x: int, y: int, values: list[list[int]], layer: layer_types = layer_types.middle) -> None:
+    def set_pixels_horizontal(self, x: int, y: int, values: list[int], layer: layer_types = layer_types.middle) -> None:
         if len(values) == 0 or y >= self.height or y < 0:
             return
-        offset_y = self.width * y * 4
-        reference = self.layers[layer]
-        if len(values[0]) == 4:
-            for x_work in range(max(0, x), min(self.width, x + len(values))):
-                offset_work = offset_y + x_work * 4
-                pixel = values[x_work - x]
-                reference[offset_work + 0] = pixel[0]
-                reference[offset_work + 1] = pixel[1]
-                reference[offset_work + 2] = pixel[2]
-                reference[offset_work + 3] = pixel[3]
+        target_offset = self.width * y * 4
+        if x < 0:
+            use = values[-x * 4:min(len(values), self.width * 4 - x * 4)]
         else:
-            for x_work in range(max(0, x), min(self.width, x + len(values))):
-                offset_work = offset_y + x_work * 4
-                pixel = values[x_work - x]
-                reference[offset_work + 0] = pixel[0]
-                reference[offset_work + 1] = pixel[1]
-                reference[offset_work + 2] = pixel[2]
-                reference[offset_work + 3] = 255
+            use = values[x * 4:min(len(values), self.width * 4 + x * 4)]
+        self.layers[layer][target_offset + 0:target_offset + len(use)] = use[:]
 
     def get_pixel(self, x: int, y: int, layer: layer_types = layer_types.middle) -> list[int, int, int]:
         if x < self.width and y < self.height and x >= 0 and y >= 0:

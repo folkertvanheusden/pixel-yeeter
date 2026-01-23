@@ -106,7 +106,8 @@ class frontend:
             y_use = y + y_offset
             if y_use < 0:
                 continue
-            rgb_values = [pil_canvas.getpixel((x, y)) for x in range(0, pil_canvas.width)]
+            region = pil_canvas.crop((0, y_use, pil_canvas.width, y_use + 1))
+            rgb_values = list(region.tobytes())
             self.b.set_pixels_horizontal(x_offset, y_use, rgb_values, layer)
 
     def get_text_width(self, font_name: str, font_height: float, text: str) -> int:
@@ -185,7 +186,7 @@ class frontend:
         self.draw_sparkline_rgb(x, y, height, values, r, g, b, a, layer)
 
     def fill_region_rgb(self, x: int, y: int, width: int, height: int, r: int, g: int, b: int, a: int = 255, layer: backend.layer_types = backend.layer_types.middle) -> None:
-        rgb_values = [(r, g, b, a)] * width
+        rgb_values = [r, g, b, a] * width
         for work_y in range(y, y + height):
             self.b.set_pixels_horizontal(x, work_y, rgb_values, layer)
 
