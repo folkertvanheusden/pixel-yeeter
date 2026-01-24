@@ -68,10 +68,13 @@ class backend:
             return
         target_offset = self.width * y * 4
         if x < 0:
-            use = values[-x * 4:min(len(values), self.width * 4 - x * 4)]
+            use = values[-x * 4:min(len(values), max(0, self.width * 4 - x * 4))]
         else:
-            use = values[x * 4:min(len(values), self.width * 4 + x * 4)]
-        self.layers[layer][target_offset + 0:target_offset + len(use)] = use[:]
+            target_offset += x * 4
+            use = values[0:min(len(values), self.width * 4 - x * 4)]
+        use_len = len(use)
+        if use_len:
+            self.layers[layer][target_offset + 0:target_offset + use_len] = use[:]
 
     def get_pixel(self, x: int, y: int, layer: layer_types = layer_types.middle) -> list[int, int, int]:
         if x < self.width and y < self.height and x >= 0 and y >= 0:
