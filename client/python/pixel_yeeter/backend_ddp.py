@@ -36,25 +36,24 @@ class backend_ddp(backend.backend):
                 packets = []
                 buffer = gen_header()
                 p_offset = offset = 0
-                for y in range(self.height):
-                    for x in range(self.width):
-                        r, g, b = self.get_mixed_pixel(x, y)
-                        buffer.append(r)
-                        buffer.append(g)
-                        buffer.append(b)
-                        offset += 3
+                for index in range(self.height * self.width):
+                    r, g, b = self.get_mixed_pixel_by_offset(index)
+                    buffer.append(r)
+                    buffer.append(g)
+                    buffer.append(b)
+                    offset += 3
 
-                        if len(buffer) > 1440 - 3:
-                            payload_len = len(buffer) - 10
-                            buffer[4] = p_offset >> 24
-                            buffer[5] = (p_offset >> 16) & 255
-                            buffer[6] = (p_offset >> 8) & 255
-                            buffer[7] = p_offset & 255
-                            buffer[8] = payload_len >> 8
-                            buffer[9] = payload_len & 255
-                            packets.append(buffer)
-                            p_offset = offset
-                            buffer = gen_header()
+                    if len(buffer) > 1440 - 3:
+                        payload_len = len(buffer) - 10
+                        buffer[4] = p_offset >> 24
+                        buffer[5] = (p_offset >> 16) & 255
+                        buffer[6] = (p_offset >> 8) & 255
+                        buffer[7] = p_offset & 255
+                        buffer[8] = payload_len >> 8
+                        buffer[9] = payload_len & 255
+                        packets.append(buffer)
+                        p_offset = offset
+                        buffer = gen_header()
 
                 if len(buffer) > 10:
                     payload_len = len(buffer) - 10

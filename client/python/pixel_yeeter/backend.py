@@ -37,12 +37,25 @@ class backend:
         rb, gb, bb, ab = self.get_pixel_alpha(x, y, layer = layer_types.back)
         rm, gm, bm, am = self.get_pixel_alpha(x, y, layer = layer_types.middle)
         rf, gf, bf, af = self.get_pixel_alpha(x, y, layer = layer_types.front)
-        rt = (rb * (255 - am) + rm * am) / 255
-        gt = (gb * (255 - am) + gm * am) / 255
-        bt = (bb * (255 - am) + bm * am) / 255
-        r = int((rt * (255 - af) + rf * af) / 255)
-        g = int((gt * (255 - af) + gf * af) / 255)
-        b = int((bt * (255 - af) + bf * af) / 255)
+        rt = (rb * (255 - am) + rm * am) // 256
+        gt = (gb * (255 - am) + gm * am) // 256
+        bt = (bb * (255 - am) + bm * am) // 256
+        r = (rt * (255 - af) + rf * af) // 256
+        g = (gt * (255 - af) + gf * af) // 256
+        b = (bt * (255 - af) + bf * af) // 256
+        return r, g, b
+
+    def get_mixed_pixel_by_offset(self, index: int) -> list[int, int, int]:
+        offset = index * 4
+        rb, gb, bb, ab = self.layers[layer_types.back][offset:offset+4]
+        rm, gm, bm, am = self.layers[layer_types.middle][offset:offset+4]
+        rf, gf, bf, af = self.layers[layer_types.front][offset:offset+4]
+        rt = (rb * (255 - am) + rm * am) // 256
+        gt = (gb * (255 - am) + gm * am) // 256
+        bt = (bb * (255 - am) + bm * am) // 256
+        r = (rt * (255 - af) + rf * af) // 256
+        g = (gt * (255 - af) + gf * af) // 256
+        b = (bt * (255 - af) + bf * af) // 256
         return r, g, b
 
     def set_pixel(self, x: int, y: int, r: int, g: int, b: int, layer: layer_types = layer_types.middle) -> None:
@@ -87,7 +100,7 @@ class backend:
         if x < self.width and y < self.height and x >= 0 and y >= 0:
             reference = self.layers[layer]
             o = y * self.width * 4 + x * 4
-            return reference[o + 0], reference[o + 1], reference[o + 2], reference[o + 3]
+            return reference[o:o+4]
         return None
 
     def update(self):

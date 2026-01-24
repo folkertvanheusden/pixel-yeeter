@@ -27,12 +27,12 @@ DDP_DIM = (128, 32)
 
 MPD_HOST = 'spacesound.vm.nurd.space'
 MPD_PORT = '6600'
-MPD_FONT = 'Courier_New.ttf'
+MPD_FONT = '/home/nurds/pixel-yeeter/client/python/examples/nurdspace/Catrinity.otf'
 MPD_FONT_HEIGHT = 16
 
 SCROLLER_PORT = 50010
 SCROLLER_FONT = '/home/nurds/pixel-yeeter/client/python/examples/nurdspace/Catrinity.otf'
-SCROLLER_SPEED = 2  # bigger value is slower, minimum is 1
+SCROLLER_SPEED = 3  # bigger value is slower, minimum is 1
 
 HTTP_INTERFACE = '0.0.0.0'
 HTTP_PORT = 8000
