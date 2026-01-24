@@ -14,6 +14,7 @@ MQTT_POWER_HOST = 'mqtt.vm.nurd.space'
 MQTT_POWER_PORT = 1883
 MQTT_POWER_TOPIC = 'ha-bridge/sensor.power'
 POWER_FONT = 'Courier_New.ttf'
+POWER_TEXT_HEIGHT = 13
 
 MQTT_BTC_HOST = 'vps001.vanheusden.com'
 MQTT_BTC_PORT = 1883
@@ -27,11 +28,11 @@ DDP_DIM = (128, 32)
 MPD_HOST = 'spacesound.vm.nurd.space'
 MPD_PORT = '6600'
 MPD_FONT = 'Courier_New.ttf'
-MPD_FONT_HEIGHT = 13
+MPD_FONT_HEIGHT = 16
 
 SCROLLER_PORT = 50010
-SCROLLER_FONT = '/home/nurds/pixel-yeeter/client/python/examples/nurdspace/UnifontExMono.ttf'
-SCROLLER_SPEED = 1  # bigger value is slower, minimum is 1
+SCROLLER_FONT = '/home/nurds/pixel-yeeter/client/python/examples/nurdspace/Catrinity.otf'
+SCROLLER_SPEED = 2  # bigger value is slower, minimum is 1
 
 HTTP_INTERFACE = '0.0.0.0'
 HTTP_PORT = 8000
@@ -60,11 +61,10 @@ def mpd():
 
                 text_y_offset = height - MPD_FONT_HEIGHT
                 canvas.fill_region_color_by_name(0, text_y_offset, width, MPD_FONT_HEIGHT, 'black')
-                canvas.draw_text_color_by_name(0, text_y_offset, MPD_FONT, MPD_FONT_HEIGHT - 2, song, 'grey', pixel_yeeter.backend.layer_types.middle)
+                canvas.draw_text_color_by_name(0, text_y_offset, MPD_FONT, MPD_FONT_HEIGHT, song, 'grey', pixel_yeeter.backend.layer_types.middle)
                 canvas.send_to_screen()
 
-                time.sleep(5)
-
+                time.sleep(1)
         except Exception as e:
             print(f'MPD failed: {e} ({e.__traceback__.tb_lineno})')
             time.sleep(1)
@@ -81,7 +81,7 @@ def power_usage(queue: queue.Queue):
                 queue.put(power_value)
                 text = f'{int(power_value)} W'
                 font_name = POWER_FONT
-                font_height = 13
+                font_height = POWER_TEXT_HEIGHT
                 text_x_offset = width - canvas.get_text_width(font_name, font_height, '9999 W')
                 canvas.fill_region_color_by_name(text_x_offset, 0, width, font_height, 'black')
                 if power_value > 1000:
@@ -115,6 +115,7 @@ pu_queue = queue.Queue()
 t_pu = threading.Thread(target=power_usage, args=(pu_queue,))
 t_pu.start()
 
+
 def btc(queue: queue.Queue):
     def on_message(client, userdata, message):
         if message.topic == MQTT_BTC_TOPIC:
@@ -144,6 +145,7 @@ btc_queue = queue.Queue()
 t_btc = threading.Thread(target=btc, args=(btc_queue,))
 t_btc.start()
 
+
 def scroller(queue):
     def stripper(what_in):
         what = ''
@@ -170,6 +172,7 @@ def scroller(queue):
             print(f'scroller failed: {e} ({e.__traceback__.tb_lineno})')
             time.sleep(0.1)
 
+
 scroller_queue = queue.Queue()
 t_scroller = threading.Thread(target=scroller, args=(scroller_queue,))
 t_scroller.start()
@@ -195,6 +198,7 @@ def http_rest(queue):
 
     httpd = HTTPServer((HTTP_INTERFACE, HTTP_PORT), http_server)
     httpd.serve_forever()
+
 
 t_http = threading.Thread(target=http_rest, args=(scroller_queue,))
 t_http.start()
@@ -231,6 +235,8 @@ while True:
         # scroller
         try:
             text = scroller_queue.get(timeout = 0.1)
+            if len(text) > 1 and text[-1] != ' ':
+                text += ' '
             if not scroller_since is None:
                 canvas.remove_animation(scroller_name)
             canvas.add_animation(scroller_name, pixel_yeeter.frontend.scroll_text(canvas, 'white', text, font_name_or_names=SCROLLER_FONT, speed=SCROLLER_SPEED))
@@ -240,7 +246,7 @@ while True:
 
         if not scroller_since is None:
             now = time.time()
-            if now - scroller_since >= 10.0 and canvas.get_animation(scroller_name).get_run_count() >= 2:
+            if now - scroller_since >= 15.0 and canvas.get_animation(scroller_name).get_run_count() >= 5:
                 canvas.remove_animation(scroller_name)
                 scroller_since = None
                 canvas.clear_front()

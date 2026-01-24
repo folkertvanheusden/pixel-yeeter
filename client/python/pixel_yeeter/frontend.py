@@ -106,7 +106,7 @@ class frontend:
             y_use = y + y_offset
             if y_use < 0:
                 continue
-            region = pil_canvas.crop((0, y_use, pil_canvas.width, y_use + 1))
+            region = pil_canvas.crop((0, y, pil_canvas.width, y + 1))
             rgb_values = list(region.tobytes())
             self.b.set_pixels_horizontal(x_offset, y_use, rgb_values, layer)
 
@@ -158,12 +158,8 @@ class frontend:
         self.draw_pil_Image(prepared_text[0], x, y, layer)
 
     def draw_text(self, x: int, y: int, font_name: str, font_height: float, text: str, r: int, g: int, b: int, layer: backend.layer_types = backend.layer_types.middle) -> None:
-        font = ImageFont.truetype(font_name, font_height)
-        text_dimensions = font.getbbox(text)
-        image = Image.new('RGBA', (text_dimensions[2], text_dimensions[3]))
-        pil_canvas = ImageDraw.Draw(image)
-        pil_canvas.text((0, 0), text, (r, g, b), font = font)
-        self.draw_pil_Image(image, x, y, layer)
+        prepared_text = self.prepare_text(font_name, font_height, text, r, g, b, 255)
+        self.draw_prepared_text(prepared_text, x, y, layer)
 
     def draw_text_color_by_name(self, x: int, y: int, font_name: str, font_height: float, text: str, color: str, layer: backend.layer_types = backend.layer_types.middle) -> None:
         r, g, b, a = self.color_name_to_rgb_alpha(color)
