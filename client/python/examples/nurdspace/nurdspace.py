@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import numpy as np
+import os
 import pixel_yeeter.backend
 import pixel_yeeter.backend_ddp
 import pixel_yeeter.frontend
@@ -7,6 +9,7 @@ import paho.mqtt.client as mqtt
 import queue
 import random
 import socket
+import sounddevice as sd
 import threading
 import time
 
@@ -203,6 +206,60 @@ def http_rest(queue):
 t_http = threading.Thread(target=http_rest, args=(scroller_queue,))
 t_http.start()
 
+
+def snapcast():
+    def run_snapcast():
+        os.system('/usr/bin/snapclient -s 1')
+    t = threading.Thread(target=run_snapcast)
+    t.start()
+
+    try:
+        samplerate = 8000
+        channels = 1
+        new_idx = np.linspace(0, 1, 64)  # 64 is width of line
+        new_fft_idx = np.linspace(0, 1, 64)
+
+        def callback(indata, frames, time, status):
+            if status:
+                print(status)
+            audio = indata.copy()
+            # audio is a NumPy array (frames x channels)
+            if audio.shape[0] == 1:
+                return
+            arr = np.asarray([x[0] for x in audio])
+            # interpolate
+            n = len(arr)
+            old_idx = np.linspace(0, 1, n)
+            new_data = np.interp(new_idx, old_idx, arr)
+            # fft
+            np_fft = np.fft.fft(arr)
+            amplitudes = 2 / len(arr) * np.abs(np_fft)
+            old_fft_idx = np.linspace(0, 1, len(amplitudes) // 2)
+            new_fft_data = np.interp(new_fft_idx, old_fft_idx, [-a for a in amplitudes[0:len(amplitudes) // 2]])
+            # print(len(new_fft_data), new_fft_data)
+
+            canvas.fill_region_color_by_name(0, 16, 128, 16, 'black', layer=pixel_yeeter.backend.layer_types.back)
+            canvas.draw_sparkline_color_by_name(64, 16, 16, new_fft_data, 'green', pixel_yeeter.backend.layer_types.back)
+            canvas.draw_sparkline_color_by_name(0, 16, 16, new_data, 'brown', pixel_yeeter.backend.layer_types.back)
+            canvas.send_to_screen()
+
+        with sd.InputStream(
+            samplerate=samplerate,
+            channels=channels,
+            device=0,
+            callback=callback
+        ):
+            while True:
+                time.sleep(1000)
+
+    except Exception as e:
+        print(f'snapcast failed: {e} ({e.__traceback__.tb_lineno})')
+        print(sd.query_devices())
+
+t_snapcast = threading.Thread(target=snapcast)
+t_snapcast.start()
+
+
 pu_values = []
 btc_values = []
 scroller_since = None
@@ -228,8 +285,8 @@ while True:
             pass
 
         canvas.clear_back()
-        canvas.draw_sparkline_color_by_name(0, 0, height - MPD_FONT_HEIGHT, pu_values, 'red', pixel_yeeter.backend.layer_types.back)
-        canvas.draw_sparkline_color_by_name(0, 0, height - MPD_FONT_HEIGHT, btc_values, 'blue', pixel_yeeter.backend.layer_types.back)
+        canvas.draw_sparkline_color_by_name(0, 0, 16, pu_values, 'red', pixel_yeeter.backend.layer_types.back)
+        canvas.draw_sparkline_color_by_name(0, 0, 16, btc_values, 'blue', pixel_yeeter.backend.layer_types.back)
         canvas.send_to_screen()
 
         # scroller
