@@ -238,6 +238,6 @@ class scroll_text(animation):
                 f.draw_pil_Image(self.image, temp_x, 0, backend.layer_types.front)
                 temp_x += self.text_width
             self.x -= 1
-            if self.x < -self.text_width:
+            if self.x <= -self.text_width:
                 self.x = 0
                 self.run_count += 1
