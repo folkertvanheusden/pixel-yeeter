@@ -44,7 +44,7 @@ while True:
     new_width = int(cam_width / factor)
     new_height = int(cam_height / factor)
 
-    img = cv2.resize(img, (new_width, new_height))
+    img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
     for y in range(new_height):
         for x in range(new_width):
             p = img[y][x]
