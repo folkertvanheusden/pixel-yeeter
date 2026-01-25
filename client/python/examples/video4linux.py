@@ -39,7 +39,7 @@ while True:
         elif fourcc == "YUYV":
             img = cv2.cvtColor(img, cv2.COLOR_YUV2GRAY_YUYV)
         else:
-            print("unsupported video format")
+            print(f'{fourcc}: unsupported video format')
             break
 
     factor_x = cam_width / (width * 2)
