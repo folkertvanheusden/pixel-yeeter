@@ -10,6 +10,15 @@ add_definitions("-D_FILE_OFFSET_BITS=64")
 
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
+if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+        MESSAGE("WITH LTO")
+        cmake_policy(SET CMP0069 NEW)
+        set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+        MESSAGE("without LTO")
+endif()
+
 if (ASAN EQUAL 1)
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined")
         MESSAGE("WITH ASAN (and USAN)")
@@ -43,6 +52,7 @@ add_executable(hub75-combined-server
 	net.cpp
 	pixelflood_handler.cpp
 	)
+target_compile_options(hub75-combined-server PRIVATE -march=native -mtune=native -O3)
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
