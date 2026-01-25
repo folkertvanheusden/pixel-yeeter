@@ -208,10 +208,11 @@ t_http.start()
 
 
 def snapcast():
-    def run_snapcast():
-        os.system('/usr/bin/snapclient -s 1')
-    t = threading.Thread(target=run_snapcast)
-    t.start()
+    # from systemd
+    #def run_snapcast():
+    #    os.system('/usr/bin/snapclient -s 1')
+    #t = threading.Thread(target=run_snapcast)
+    #t.start()
 
     try:
         samplerate = 8000
