@@ -37,12 +37,12 @@ bool handle_ddp_payload_binary(const uint8_t *const buffer, const size_t n, cons
 	}
 
 	uint32_t offset = (buffer[4] << 24) | (buffer[5] << 16) | (buffer[6] << 8) | buffer[7];
-	// uint16_t length = (buffer[8] << 8) | buffer[9];
+	uint16_t length = (buffer[8] << 8) | buffer[9];
 
 	std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > pixels;
 
 	int packet_start_index = has_timecode ? 14 : 10;
-	for(size_t i=packet_start_index; i<n; i += 3) {
+	for(size_t i=packet_start_index; i<std::min(size_t(packet_start_index + length), n); i += 3) {
 		unsigned offset_offseted = offset + i - packet_start_index;
 		int y = offset_offseted / (width * 3);
 		if (y < height) {
