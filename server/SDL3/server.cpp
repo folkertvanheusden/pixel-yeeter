@@ -16,14 +16,13 @@ std::mutex       sdl_lock;
 int              win_width    = 0;
 int              win_height   = 0;
 uint8_t         *frame_buffer = nullptr;
-SDL_Renderer    *screen       = nullptr;
 std::atomic_bool has_pixels { false };
 
 void draw_pixels(const std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t> > & pixels)
 {
 	for(auto & pixel: pixels) {
 		const auto [x, y, r, g, b] = pixel;
-		int offset = y * win_width * 3 + x * 3;
+		int offset = y * win_width * 4 + x * 4;
 		frame_buffer[offset + 0] = r;
 		frame_buffer[offset + 1] = g;
 		frame_buffer[offset + 2] = b;
@@ -50,11 +49,14 @@ int main(int argc, char *argv[])
 	SDL_SyncWindow(win);
 	SDL_GetWindowSize(win, &win_width, &win_height);
 	printf("Window size: %dx%d, driver: %s\n", win_width, win_height, SDL_GetCurrentVideoDriver());
-	screen = SDL_CreateRenderer(win, nullptr);
-	if (SDL_RenderPresent(screen) == false)
-		printf("SDL_RenderPresent failed\n");
+	SDL_Renderer *screen = SDL_CreateRenderer(win, nullptr);
 
-	frame_buffer = new uint8_t[win_width * win_height * 3]();
+			SDL_SetRenderViewport(screen, nullptr);
+			SDL_SetRenderLogicalPresentation(screen, win_width, win_height, SDL_LOGICAL_PRESENTATION_STRETCH);
+
+	size_t n_bytes = win_width * win_height * 4;
+	frame_buffer = new uint8_t[n_bytes]();
+	memset(frame_buffer, 255, n_bytes);
 
 	// pixelflood
 	int pixelflood_udp_txt_fd = start_udp_listen("0.0.0.0", 1337);
@@ -109,24 +111,38 @@ int main(int argc, char *argv[])
 	});
 	t_pixelflood_broadcast.detach();
 
+	SDL_Texture *texture = SDL_CreateTexture(screen, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, win_width, win_height);
+	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
+
 	for(;;) {
 		SDL_Event event { };
-		while(SDL_WaitEventTimeout(&event, 1)) {
-			printf("%d\n", event.type);
-			if (event.type == SDL_EVENT_QUIT)
-				exit(1);
-		}
 
 		if (has_pixels.exchange(false)) {
-			SDL_Surface *surface = SDL_CreateSurfaceFrom(win_width, win_height, SDL_PIXELFORMAT_RGB24, frame_buffer, win_width * 3);
-			auto texture = SDL_CreateTextureFromSurface(screen, surface);
+			void *pixels = nullptr;
+			int   pitch  = 0;
+			if (SDL_LockTexture(texture, NULL, &pixels, &pitch) == false)
+				printf("SDL_LockTexture failed\n");
+			memcpy(pixels, frame_buffer, win_height * pitch);
+			SDL_UnlockTexture(texture);
 			SDL_RenderTexture(screen, texture, nullptr, nullptr);
 			if (SDL_RenderPresent(screen) == false)
 				printf("SDL_RenderPresent failed\n");
-			SDL_DestroySurface(surface);
-			SDL_DestroyTexture(texture);
+
+			while(SDL_PollEvent(&event)) {
+				printf("%d\n", event.type);
+				if (event.type == SDL_EVENT_QUIT)
+					exit(1);
+			}
+		}
+		else {
+			while(SDL_WaitEventTimeout(&event, 1)) {
+				if (event.type == SDL_EVENT_QUIT)
+					exit(1);
+			}
 		}
 	}
+
+	SDL_DestroyTexture(texture);
 
 	close(pixelflood_tcp_txt_fd);
 	close(pixelflood_udp_bin_fd);
