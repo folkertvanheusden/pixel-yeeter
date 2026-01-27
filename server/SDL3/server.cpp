@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <mutex>
+#include <optional>
 #include <thread>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -36,23 +37,48 @@ void put_pixels()
 
 void usage()
 {
+	printf("-W x  width\n");
+	printf("-H x  height\n");
+	printf("-h    this help\n");
 }
 
 int main(int argc, char *argv[])
 {
+	std::optional<int> set_width;
+	std::optional<int> set_height;
+	int c = 0;
+	while((c = getopt(argc, argv, "W:H:h")) != -1) {
+		if (c == 'W')
+			set_width = atoi(optarg);
+		else if (c == 'H')
+			set_height = atoi(optarg);
+		else {
+			usage();
+			exit(0);
+		}
+	}
+
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) == false)
 		error_exit(false, "Cannot initialize SDL");
 
+	if (set_width.has_value() != set_height.has_value())
+		error_exit(false, "Need to set either both dimensions or none");
+
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
-        SDL_Window *win = SDL_CreateWindow("server", 320, 240, SDL_WINDOW_RESIZABLE);
-	SDL_MaximizeWindow(win);
-	SDL_SyncWindow(win);
+	SDL_Window *win = nullptr;
+	if (set_width.has_value()) {
+		win = SDL_CreateWindow("server", set_width.value(), set_height.value(), 0);
+		SDL_MaximizeWindow(win);
+		SDL_SyncWindow(win);
+	}
+	else {
+		win = SDL_CreateWindow("server", 320, 240, SDL_WINDOW_RESIZABLE);
+		SDL_MaximizeWindow(win);
+		SDL_SyncWindow(win);
+	}
 	SDL_GetWindowSize(win, &win_width, &win_height);
 	printf("Window size: %dx%d, driver: %s\n", win_width, win_height, SDL_GetCurrentVideoDriver());
 	SDL_Renderer *screen = SDL_CreateRenderer(win, nullptr);
-
-			SDL_SetRenderViewport(screen, nullptr);
-			SDL_SetRenderLogicalPresentation(screen, win_width, win_height, SDL_LOGICAL_PRESENTATION_STRETCH);
 
 	size_t n_bytes = win_width * win_height * 4;
 	frame_buffer = new uint8_t[n_bytes]();
