@@ -23,6 +23,10 @@ MQTT_BTC_HOST = 'vps001.vanheusden.com'
 MQTT_BTC_PORT = 1883
 MQTT_BTC_TOPIC = 'vanheusden/bitcoin/bitstamp_usd'
 
+MQTT_STATE_HOST = 'mqtt.vm.nurd.space'
+MQTT_STATE_PORT = 1883
+MQTT_STATE_TOPIC = 'space/statedigit'
+
 #DDP_HOST = '192.168.65.140'
 DDP_HOST = '10.208.1.48'
 DDP_PORT = 4048
@@ -40,13 +44,23 @@ SCROLLER_SPEED = 3  # bigger value is slower, minimum is 1
 HTTP_INTERFACE = '0.0.0.0'
 HTTP_PORT = 8000
 
+space_state_value = 1
+
 canvas = pixel_yeeter.frontend.frontend(pixel_yeeter.backend_ddp.backend_ddp(DDP_HOST, DDP_PORT, DDP_DIM))
 width, height = canvas.get_resolution()
+
+# TODO replace by condition-variable
+def check_space_state():
+    while space_state_value == 0:
+        time.sleep(1)
+
 
 def mpd():
     from mpd import (MPDClient, CommandError)
 
     while True:
+        check_space_state()
+
         try:
             client = MPDClient()
             client.connect(MPD_HOST, MPD_PORT)
@@ -100,6 +114,7 @@ def power_usage(queue: queue.Queue):
 
     def on_connect(client, userdata, flags, rc, bla):
         if rc == 0:
+            print(f'Subscribe to {MQTT_POWER_TOPIC}')
             client.subscribe(MQTT_POWER_TOPIC)
 
     while True:
@@ -130,6 +145,7 @@ def btc(queue: queue.Queue):
 
     def on_connect(client, userdata, flags, rc, bla):
         if rc == 0:
+            print(f'Subscribe to {MQTT_BTC_TOPIC}')
             client.subscribe(MQTT_BTC_TOPIC)
 
     while True:
@@ -147,6 +163,43 @@ def btc(queue: queue.Queue):
 btc_queue = queue.Queue()
 t_btc = threading.Thread(target=btc, args=(btc_queue,))
 t_btc.start()
+
+
+prev_space_state_value = None
+def space_state():
+    def on_message(client, userdata, message):
+        global space_state_value
+        global prev_space_state_value
+
+        if message.topic == MQTT_STATE_TOPIC:
+            try:
+                space_state_value = float(message.payload.decode('utf-8'))
+                if space_state_value != prev_space_state_value:
+                    prev_space_state_value = space_state_value
+                    print(f'Space state is now {"open" if space_state_value else "closed"}')
+            except Exception as e:
+                print(f'space_state on_message failed: {e} ({e.__traceback__.tb_lineno})')
+
+    def on_connect(client, userdata, flags, rc, bla):
+        if rc == 0:
+            print(f'Subscribe to {MQTT_STATE_TOPIC}')
+            client.subscribe(MQTT_STATE_TOPIC)
+
+    while True:
+        try:
+            client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+            client.connect(MQTT_STATE_HOST, port=MQTT_STATE_PORT, keepalive=60)
+            client.on_message = on_message
+            client.on_connect = on_connect
+            client.loop_forever()
+
+        except Exception as e:
+            print(f'space_state failed: {e} ({e.__traceback__.tb_lineno})')
+            time.sleep(1)
+
+space_state_queue = queue.Queue()
+t_space_state = threading.Thread(target=space_state)
+t_space_state.start()
 
 
 def scroller(queue):
@@ -221,6 +274,8 @@ def snapcast():
         new_fft_idx = np.linspace(0, 1, 64)
 
         def callback(indata, frames, time, status):
+            if space_state_value == 0:
+                return
             if status:
                 print(status)
             audio = indata.copy()
@@ -264,9 +319,21 @@ t_snapcast.start()
 pu_values = []
 btc_values = []
 scroller_since = None
+ping_state = False
 
 while True:
     try:
+        if space_state_value == 0:
+            canvas.clear_back()
+            canvas.clear_middle()
+            canvas.clear_front()
+            c = 255 if ping_state else 0
+            ping_state = not ping_state
+            canvas.set_pixel_rgb(width // 2, height // 2, c, c, c)
+            canvas.send_to_screen()
+            time.sleep(1/3)
+            continue
+
         # power usage
         try:
             value = pu_queue.get(timeout = 0.1)

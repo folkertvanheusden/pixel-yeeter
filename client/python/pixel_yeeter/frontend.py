@@ -49,6 +49,9 @@ class frontend:
     def clear_screen(self) -> None:
         self.b.clear_screen()
 
+    def clear_middle(self) -> None:
+        self.b.clear_screen()
+
     def clear_front(self) -> None:
         self.b.clear_front()
 
