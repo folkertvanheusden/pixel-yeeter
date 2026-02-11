@@ -223,7 +223,7 @@ class scroll_text(animation):
         new_height = f.get_resolution()[1]
         if new_height != prepared_text[2]:
             new_width  = int(new_height * prepared_text[1] / prepared_text[2])
-            self.image = self.image.resize((new_width, new_height), Image.LANCZOS)
+            self.image = self.image.resize((new_width, new_height), Image.BICUBIC)
             self.text_width = new_width
         else:
             self.text_width = prepared_text[1]
